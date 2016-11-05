@@ -5,7 +5,7 @@
 // heater supply
 #define DDR_HEATER DDRB
 #define PORT_HEATER PORTB
-#define PINNUM_HEATER 2
+#define PINNUM_HEATER 4
 #define HEATER_OFFSTATE false
 
 // power of status led
@@ -18,7 +18,7 @@
 #define ADC_AC 2
 #define DDR_AC DDRB
 #define PORT_AC PORTB
-#define PINNUM_AC 2
+#define PINNUM_AC 4
 #define TRESHOLD_DATA_AC 80
 
 // OneWire Line Supply
