@@ -15,9 +15,11 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project("avtoheater")
 
-SET(flags "-mmcu=attiny85 -D__AVR_ATtiny85__ -DF_CPU=8000000UL -Wall -Wl,-r ")
+SET(flags "-mmcu=attiny85 -D__AVR_ATtiny85__ -DF_CPU=8000000UL \
+	-Wall -Wl,--gc-sections -fdata-sections -ffunction-sections")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags}")
+
 
 #add_definitions("-DARDUINO=101")
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Arduino/arduino ${CMAKE_CURRENT_SOURCE_DIR}/Arduino/variants/gemma)
@@ -32,6 +34,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/temp/OneWire
 file(GLOB_RECURSE EXE_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 add_executable(${PROJECT_NAME} ${EXE_SRC})# ${ARDUINO_SRC})
 
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
+	nm --print-size -t d -C --size-sort ${PROJECT_NAME})
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
 	avr-size -A -t ${PROJECT_NAME})
