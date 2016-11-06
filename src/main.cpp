@@ -4,6 +4,13 @@
 #include <conf.h>
 
 
+#define REQUIRED_TEMP 20
+
+
+void indicateAll(uint16_t deviceCount, const float & temp);
+void indicateCount(uint16_t count);
+
+
 int main()
 {
     sei();
@@ -11,11 +18,11 @@ int main()
     OneWire wire(ONEWIREPIN);
     DallasTemperature sensors(&wire);
 
-    /*
-    HWiface::turnOneWireLineOn();
-    sensors.begin();
     while(1)
     {
+        HWiface::turnOneWireLineOn();
+        sensors.begin();
+
         sensors.requestTemperatures();
         auto deviceCount = sensors.getDeviceCount();
 
@@ -24,12 +31,14 @@ int main()
             tempAvg += sensors.getTempCByIndex(i);
         tempAvg /= deviceCount;
 
-
-        if(tempAvg < 20) HWiface::turnHeaterOn();
+        if(tempAvg < REQUIRED_TEMP) HWiface::turnHeaterOn();
         else HWiface::turnHeaterOff();
-    }*/
 
-   /* while(1)
+        indicateAll(deviceCount, tempAvg);
+    }
+
+
+    /* while(1)
     {
         HWiface::turnHeaterOn();
         _delay_ms(1000);
@@ -41,25 +50,51 @@ int main()
         _delay_ms(500);
     }*/
 
-    while(1)
+    /* while(1)
     {
         HWiface::turnOneWireLineOn();
         sensors.begin();
+        indicateCount(sensors.getDeviceCount());
+        _delay_ms(2000);
+    }*/
+
+    /* while(1)
+    {
+        HWiface::turnOneWireLineOn();
+        sensors.begin();
+
         sensors.requestTemperatures();
         auto deviceCount = sensors.getDeviceCount();
-        _delay_ms(2000);
-        HWiface::turnOneWireLineOff();
-        _delay_ms(1000);
 
-       for(auto i = 0; i<deviceCount; i++)
-       {
-           HWiface::turnOneWireLineOn();
-           _delay_ms(50);
-           HWiface::turnOneWireLineOff();
-           _delay_ms(150);
-       }
-        _delay_ms(2000);
-    }
+        float tempAvg = 0;
+        for(auto i = 0; i<deviceCount; i++)
+            tempAvg += sensors.getTempCByIndex(i);
+        tempAvg /= deviceCount;
+
+        if(((int)tempAvg)%2) HWiface::turnHeaterOn();
+        else HWiface::turnHeaterOff();
+    }*/
 
     return 0;
+}
+
+void indicateAll(uint16_t deviceCount, const float & temp)
+{
+    indicateCount(deviceCount);
+    indicateCount((int32_t)temp%20);
+    indicateCount((int32_t)(temp*10)%10);
+    _delay_ms(1500);
+}
+
+void indicateCount(uint16_t count)
+{
+    HWiface::turnOneWireLineOff();
+    _delay_ms(1000);
+   for(; 0<count; count--)
+   {
+       HWiface::turnOneWireLineOn();
+       _delay_ms(250);
+       HWiface::turnOneWireLineOff();
+       _delay_ms(250);
+   }
 }
