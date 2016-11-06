@@ -7,16 +7,18 @@
 int main()
 {
     sei();
-/*
+
     OneWire wire(ONEWIREPIN);
     DallasTemperature sensors(&wire);
 
+    /*
     HWiface::turnOneWireLineOn();
     sensors.begin();
-
     while(1)
     {
+        sensors.requestTemperatures();
         auto deviceCount = sensors.getDeviceCount();
+
         float tempAvg = 0;
         for(auto i = 0; i<deviceCount; i++)
             tempAvg += sensors.getTempCByIndex(i);
@@ -27,7 +29,7 @@ int main()
         else HWiface::turnHeaterOff();
     }*/
 
-    while(1)
+   /* while(1)
     {
         HWiface::turnHeaterOn();
         _delay_ms(1000);
@@ -37,6 +39,26 @@ int main()
         _delay_ms(1000);
         HWiface::turnOneWireLineOff();
         _delay_ms(500);
+    }*/
+
+    while(1)
+    {
+        HWiface::turnOneWireLineOn();
+        sensors.begin();
+        sensors.requestTemperatures();
+        auto deviceCount = sensors.getDeviceCount();
+        _delay_ms(2000);
+        HWiface::turnOneWireLineOff();
+        _delay_ms(1000);
+
+       for(auto i = 0; i<deviceCount; i++)
+       {
+           HWiface::turnOneWireLineOn();
+           _delay_ms(50);
+           HWiface::turnOneWireLineOff();
+           _delay_ms(150);
+       }
+        _delay_ms(2000);
     }
 
     return 0;
