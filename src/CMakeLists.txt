@@ -15,7 +15,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project("avtoheater")
 
-SET(flags "-mmcu=attiny85 -D__AVR_ATtiny85__ -DF_CPU=1000000UL \
+SET(flags "-mmcu=attiny85 -D__AVR_ATtiny85__ -DF_CPU=8000000UL \
 	-Wall -Wl,--gc-sections -fdata-sections -ffunction-sections")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags}")
@@ -26,11 +26,16 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags}")
 #file(GLOB_RECURSE ARDUINO_SRC ${CMAKE_CURRENT_SOURCE_DIR}/Arduino/arduino/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Arduino/arduino/*.c)
 
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/temp/OneWire
+include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/temp/OneWire
 	${CMAKE_CURRENT_SOURCE_DIR}/temp/DallasTemp
 	${CMAKE_CURRENT_SOURCE_DIR}/temp/arduino_routine
 	${CMAKE_CURRENT_SOURCE_DIR}/hwiface
-	${CMAKE_CURRENT_SOURCE_DIR} )
+	${CMAKE_CURRENT_SOURCE_DIR}/net/I2C
+	${CMAKE_CURRENT_SOURCE_DIR}/net/server
+	${CMAKE_CURRENT_SOURCE_DIR}/memory
+)
 
 
 file(GLOB_RECURSE EXE_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/*.c)

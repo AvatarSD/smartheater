@@ -6,6 +6,11 @@
 #include <stdlib.h>
 
 
+
+#include <server.h>
+
+
+
 #define REQUIRED_TEMP 20
 
 
@@ -17,7 +22,10 @@ int main()
 {
     sei();
 
-    OneWire wire(ONEWIREPIN);
+    setup();
+    while(1) loop();
+
+    /*OneWire wire(ONEWIREPIN);
     DallasTemperature sensors(&wire);
 
     while(1)
@@ -37,7 +45,7 @@ int main()
         else HWiface::turnHeaterOff();
 
         indicateAll(deviceCount, tempAvg);
-    }
+    }*/
 
 
     /* while(1)
