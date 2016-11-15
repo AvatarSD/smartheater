@@ -14,7 +14,7 @@
 #define REQUIRED_TEMP 20
 
 
-void indicateAll(uint16_t deviceCount, const float &temp);
+void indicateAll(uint16_t deviceCount, const float & temp);
 void indicateCount(int16_t count);
 
 
@@ -22,8 +22,10 @@ int main()
 {
     sei();
     setup();
-    //while(1) loop();
-    OneWire wire(ONEWIREPIN);
+
+    while(1) loop();
+
+    /*OneWire wire(ONEWIREPIN);
     DallasTemperature sensors(&wire);
     while(1)
         {
@@ -38,7 +40,7 @@ int main()
             if((tempAvg < REQUIRED_TEMP)&&(deviceCount > 0)) HWiface::turnHeaterOn();
             else HWiface::turnHeaterOff();
             indicateAll(deviceCount, tempAvg);
-        }
+        }*/
     /* while(1)
     {
         HWiface::turnHeaterOn();
@@ -76,11 +78,11 @@ int main()
     return 0;
 }
 
-void indicateAll(uint16_t deviceCount, const float &temp)
+void indicateAll(uint16_t deviceCount, const float & temp)
 {
     indicateCount(deviceCount);
-    indicateCount((int16_t)temp%20);
-    indicateCount((int16_t)(temp*10)%10);
+    indicateCount((int16_t)temp % 20);
+    indicateCount((int16_t)(temp * 10) % 10);
     _delay_ms(1500);
 }
 
@@ -89,11 +91,12 @@ void indicateCount(int16_t count)
     count = abs(count);
     HWiface::turnOneWireLineOff();
     _delay_ms(1000);
-    for(; 0<count; count--)
-        {
-            HWiface::turnOneWireLineOn();
-            _delay_ms(250);
-            HWiface::turnOneWireLineOff();
-            _delay_ms(250);
-        }
+
+    for(; 0 < count; count--)
+    {
+        HWiface::turnOneWireLineOn();
+        _delay_ms(250);
+        HWiface::turnOneWireLineOff();
+        _delay_ms(250);
+    }
 }
