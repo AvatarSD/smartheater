@@ -54,4 +54,4 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
 
 #program to board
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-	avrdude -v -e -p t85 -c dragon_dw -Uflash:w:${PROJECT_NAME}.hex:i)
+	avrdude -v -e -p t85 -c dragon_dw -Uflash:w:${PROJECT_NAME}.hex:i -Ueeprom:w:${PROJECT_NAME}_eeprom.hex)
