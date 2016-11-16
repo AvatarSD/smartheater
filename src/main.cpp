@@ -21,9 +21,10 @@ void indicateCount(int16_t count);
 int main()
 {
     sei();
-    setup();
 
-    while(1) loop();
+    I2CSlaveServer * server = I2CSlaveServer::getInstance();
+    server->setup();
+    while(1);
 
     /*OneWire wire(ONEWIREPIN);
     DallasTemperature sensors(&wire);
@@ -92,8 +93,7 @@ void indicateCount(int16_t count)
     HWiface::turnOneWireLineOff();
     _delay_ms(1000);
 
-    for(; 0 < count; count--)
-    {
+    for(; 0 < count; count--) {
         HWiface::turnOneWireLineOn();
         _delay_ms(250);
         HWiface::turnOneWireLineOff();
