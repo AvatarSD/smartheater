@@ -16,7 +16,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 project("avtoheater")
 
 SET(flags "-mmcu=attiny85 -D__AVR_ATtiny85__ -DF_CPU=8000000UL \
-	-Wall -Wl,--gc-sections -fdata-sections -ffunction-sections")
+	-Wall -Wl,--gc-sections -fdata-sections -ffunction-sections -fno-threadsafe-statics")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags}")
 
