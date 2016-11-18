@@ -42,14 +42,13 @@ void UsiTwiSlave::SET_USI_TO_TWI_START_CONDITION_MODE()
 {
     /* set USI counter to shift 1 bit */
     /* clear all interrupt flags, except Start Cond */
-    USI::setStatus(1, 1, 1, 1, 0x00);
-    /* set SDA as input */
-    USI::disableSDAOpenDrain();
-    /* enable Start Condition Interrupt, disable Overflow Interrupt */
-    USI::enableStartInt();
-    USI::disableOvfInt();
+    USI::setStatus(0, 1, 1, 1, 0x00);
     /* set USI in Two-wire mode, no USI Counter overflow hold */
     USI::setWireMode(WireMode::TWI);
+    /* enable Start Condition Interrupt, disable Overflow Interrupt */
+    USI::disableOvfInt();
+    USI::enableStartInt();
+
     /* Shift Register Clock Source = External, positive edge */
     /* 4-Bit Counter: Source = external,both edges */
     USI::setClockMode(ClockMode::EXT_POS);
@@ -194,6 +193,8 @@ void UsiTwiSlave::overflowHandler()
         putIntoRXBuff(dataRegBuff);
 #else
         if(receiveCall(startCounter++, dataRegBuff) < 0) {
+            //USI::disableSDAOpenDrain();
+            //SET_USI_TO_READ_ACK();
             SET_USI_TO_TWI_START_CONDITION_MODE();
             return;
         }
