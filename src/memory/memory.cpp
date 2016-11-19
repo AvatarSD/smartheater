@@ -13,11 +13,11 @@
 class GUID : public Composite<uint8_t[GUID_SIZE]>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
-    static ReadType read(Address addr, Num num = 0)
+    static ReadType read(Address addr, Num num)
     {
         static const uint8_t GUID[GUID_SIZE] = {0x66, 0x11, 0x70, 0x8B,
                                                 0xC4, 0x76, 0x41, 0x96,
@@ -31,202 +31,144 @@ public:
 class SlaveAddress : public Composite<uint8_t>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        return 'A';
     }
 };
 class RequiredTemp : public Composite<uint16_t>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        return 'T';
     }
 };
 class SensorCount : public Composite<uint8_t>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        return 'Q';
     }
 };
 class Status : public Composite<uint8_t>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        return 'S';
     }
 };
 class Control : public Composite<uint8_t>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        return 'C';
     }
 };
 
 class ROM : public Composite<uint8_t[ROM_SIZE]>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        if(addr == 1)
+            return num;
+        return 'r';
     }
 };
 class Temp : public Composite<uint16_t>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        return 't';
     }
 };
 class SensorStatus : public Composite<uint8_t>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        return 's';
     }
 };
 
 class _res_ : public Composite<uint8_t[RESERVED_SIZE]>
 {
 public:
-    static Error write(Address addr, uint8_t data, Num num = 0)
+    static Error write(Address addr, uint8_t data, Num num)
     {
-        return ERR;
+        return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return ERR;
+        return '_';
     }
 };
 
 
 
 
-
-
-class Node : public Composite<ROM, Temp, SensorStatus> {};
-class Nodes : public CompositeList<Node, MAX_SENSORS> {};
 class Header : public
     Composite<GUID, SlaveAddress, RequiredTemp, SensorCount, Status, Control> {};
+class Node : public Composite<ROM, Temp, SensorStatus> {};
+class Nodes : public CompositeList<Node, MAX_SENSORS> {};
 
 class MainMem : public Composite<Header, _res_, Nodes> {};
 
 
+
 static_assert(sizeof(MainMem) == 256, "MainMen is not 256bytes in size");
+typedef MainMem MainMemore;
 
-/*
+
+
 int8_t memory::write(uint8_t addr, uint8_t data)
 {
-    return MainMem::write(addr, data);
+    return MainMemore::write(addr, data);
 }
 
 int16_t memory::read(uint8_t addr)
 {
-    return MainMem::read(addr);
+    return MainMemore::read(addr);
 }
 
 uint16_t memory::mapsize()
 {
-    return sizeof(MainMem);
-}
-*/
-
-/*Main eemap EEMEM;
-
-//volatile uint8_t i2c_regs[] = {
-//    "When switching between tri-state ({DDxn, PORTxn} = 0b00) and output high "
-//    "({DDxn, PORTxn} = 0b11), an intermediate state with either pull-up enabled "
-//    "{DDxn, PORTxn} = 0b01) or output low ({DDxn, PORTxn} = 0b10) must occur.  SD"
-//};
-void memory::write(uint8_t addr, uint8_t data)
-{
-    eeprom_write_byte((uint8_t *)&eemap + addr, data);
-}
-
-uint8_t memory::read(uint8_t addr)
-{
-    return eeprom_read_byte((uint8_t *)&eemap + addr);
-}
-
-uint16_t memory::mapsize()
-{
-    return sizeof(eemap);
-}
-*/
-
-/*void memory::write(uint8_t addr, uint8_t data)
-{
-    //eeprom_write_byte((uint8_t *)&eemap + addr, data);
-}
-
-uint8_t memory::read(uint8_t addr)
-{
-    return '$';
-}
-
-uint16_t memory::mapsize()
-{
-    return 10;
-}
-*/
-
-volatile uint8_t i2c_regs[] = {
-    "When switching between tri-state ({DDxn, PORTxn} = 0b00) and output high "
-    "({DDxn, PORTxn} = 0b11), an intermediate state with either pull-up enabled "
-    "{DDxn, PORTxn} = 0b01) or output low ({DDxn, PORTxn} = 0b10) must occur.  SD"
-};
-int8_t memory::write(uint8_t addr, uint8_t data)
-{
-    i2c_regs[addr] = data;
-    return 0;
-}
-
-int16_t memory::read(uint8_t addr)
-{
-    return i2c_regs[addr];
-}
-
-uint16_t memory::mapsize()
-{
-    return sizeof(i2c_regs) - 1;
+    return sizeof(MainMemore);
 }

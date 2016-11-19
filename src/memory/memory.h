@@ -7,11 +7,12 @@
  * __________________HEADER_____________________
  * |__START__|__SIZE__|_DESCRIPTIONS_|_OPTIONS_|
  * |0        |16      |guid          |ro       |
- * |16       |2       |require temp  |rw       |
- * |18       |1       |sensors count |ro       |
- * |19       |2       |[res]stat&ctl |rw       |
+ * |16       |1       |i2c addr      |ro       |
+ * |17       |2       |require temp  |rw       |
+ * |19       |1       |sensors count |ro       |
+ * |20       |2       |[res]stat&ctl |rw       |
  * ---------------------------------------------
- * |SIZE: 21 |
+ * |SIZE: 22 |
  *
  * ________________Device Node__________________
  * |__START__|__SIZE__|_DESCRIPTIONS_|_OPTIONS_|
@@ -24,7 +25,7 @@
  * ___________________Main__________________
  * |__START__|__SIZE__|____DESCRIPTIONS____|
  * |0        |21      |HEADER              |
- * |21       |14      |[res]               |
+ * |22       |13      |[res]               |
  * |35+N     |46+N    |Nodes(N={0..19})    |
  * -----------------------------------------
  * |SIZE:256 |
