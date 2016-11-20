@@ -4,3 +4,6 @@
 [submodule "src/temp/OneWire"]
 	path = src/temp/OneWire
 	url = https://github.com/PaulStoffregen/OneWire
+[submodule "src/memory/polymorphmemory"]
+	path = src/memory/polymorphmemory
+	url = git@github.com:AvatarSD/polymorphmemory.git
