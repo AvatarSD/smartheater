@@ -7,7 +7,7 @@
 
 
 
-#include <server.h>
+//#include <server.h>
 
 
 
@@ -22,26 +22,26 @@ int main()
 {
     sei();
 
-    I2CSlaveServer * server = I2CSlaveServer::getInstance();
-    server->setup();
-    while(1);
+    //I2CSlaveServer * server = I2CSlaveServer::getInstance();
+    //server->setup();
 
-    /*OneWire wire(ONEWIREPIN);
+    //    while(1);
+
+    OneWire wire(ONEWIREPIN);
     DallasTemperature sensors(&wire);
-    while(1)
-        {
-            HWiface::turnOneWireLineOn();
-            sensors.begin();
-            sensors.requestTemperatures();
-            uint16_t deviceCount = sensors.getDeviceCount();
-            float tempAvg = 0;
-            for(uint16_t i = 0; i<deviceCount; i++)
-                tempAvg += sensors.getTempCByIndex(i);
-            tempAvg /= deviceCount;
-            if((tempAvg < REQUIRED_TEMP)&&(deviceCount > 0)) HWiface::turnHeaterOn();
-            else HWiface::turnHeaterOff();
-            indicateAll(deviceCount, tempAvg);
-        }*/
+    while(1) {
+        HWiface::turnOneWireLineOn();
+        sensors.begin();
+        sensors.requestTemperatures();
+        uint16_t deviceCount = sensors.getDeviceCount();
+        float tempAvg = 0;
+        for(uint16_t i = 0; i < deviceCount; i++)
+            tempAvg += sensors.getTempCByIndex(i);
+        tempAvg /= deviceCount;
+        if((tempAvg < REQUIRED_TEMP) && (deviceCount > 0)) HWiface::turnHeaterOn();
+        else HWiface::turnHeaterOff();
+        indicateAll(deviceCount, tempAvg);
+    }
     /* while(1)
     {
         HWiface::turnHeaterOn();
