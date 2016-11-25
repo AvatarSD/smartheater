@@ -31,6 +31,7 @@
 #define ONEWIREPIN 3
 
 //settings
+#define MAX_SENSORS 20
 #define REQUIRED_TEMP 20
 #define I2C_SLAVE_ADDRESS 0x04 // TODO for test
 

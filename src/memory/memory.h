@@ -35,7 +35,6 @@
 #define GUID_SIZE 16
 #define ROM_SIZE 8
 #define RESERVED_SIZE 12
-#define MAX_SENSORS 20
 
 namespace memory
 {

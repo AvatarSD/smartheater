@@ -24,6 +24,8 @@ void setSensorTemp(uint8_t num, const float & temp);
 const uint8_t * getSensorRom(uint8_t num);
 SensorStatusEnum getSensorStatus(uint8_t num);
 
+uint8_t getDeviceCount();
+
 
 }
 

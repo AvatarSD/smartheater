@@ -1,6 +1,7 @@
 #include "memory.h"
 #include <polymorphmemory.h>
 #include "settings.h"
+#include <conf.h>
 
 
 class GUID : public Composite<uint8_t[GUID_SIZE]>

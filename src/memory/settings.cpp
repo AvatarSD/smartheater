@@ -85,6 +85,11 @@ SensorStatusEnum getSensorStatus(uint8_t num)
                &backstagemem::sensorNodes[num].status);
 }
 
+uint8_t getDeviceCount()
+{
+    return settingsextetnal::getDeviceCount();
+}
+
 }
 
 
