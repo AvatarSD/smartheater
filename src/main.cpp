@@ -1,13 +1,16 @@
-
 #include <DallasTemperature.h>
 #include <hwiface.h>
 #include <conf.h>
 #include <server.h>
 #include <settings.h>
+#include <indication.h>
 
 
-void indicateAll(uint16_t deviceCount, const float & temp);
-void indicateCount(uint16_t count);
+void searchSensors()
+{
+
+
+}
 
 
 int main()
@@ -30,8 +33,27 @@ int main()
         settingsinternal::setDeviceCount(deviceCount);
 
         float tempAvg = 0;
-        for(uint16_t i = 0; i < deviceCount; i++)
-            tempAvg += sensors.getTempCByIndex(i);
+        for(uint16_t i = 0; i < deviceCount; i++) {
+
+
+            DeviceAddress deviceAddress;
+            if(!sensors.getAddress(deviceAddress, i)) {
+                settingsinternal::setSensorStatus(i, SensorStatusEnum::NoResponse);
+                continue;
+            }
+
+            settingsinternal::setSensorStatus(i, SensorStatusEnum::Active);
+            settingsinternal::setSensorRom(i, deviceAddress);
+            float tempTmp = sensors.getTempC((uint8_t *)deviceAddress);
+
+
+
+
+
+            //float tempTmp = sensors.getTempCByIndex(i);
+            tempAvg += tempTmp;
+            settingsinternal::setSensorTemp(i, tempTmp);
+        }
         tempAvg /= deviceCount;
         settingsinternal::setTempAvg(tempAvg);
 
@@ -41,60 +63,6 @@ int main()
 
         indicateAll(deviceCount, tempAvg);
     }
-    /* while(1)
-    {
-        HWiface::turnHeaterOn();
-        _delay_ms(1000);
-        HWiface::turnHeaterOff();
-        _delay_ms(500);
-        HWiface::turnOneWireLineOn();
-        _delay_ms(1000);
-        HWiface::turnOneWireLineOff();
-        _delay_ms(500);
-    }*/
-    /* while(1)
-    {
-        HWiface::turnOneWireLineOn();
-        sensors.begin();
-        indicateCount(sensors.getDeviceCount());
-        _delay_ms(2000);
-    }*/
-    /* while(1)
-    {
-        HWiface::turnOneWireLineOn();
-        sensors.begin();
 
-        sensors.requestTemperatures();
-        auto deviceCount = sensors.getDeviceCount();
-
-        float tempAvg = 0;
-        for(auto i = 0; i<deviceCount; i++)
-            tempAvg += sensors.getTempCByIndex(i);
-        tempAvg /= deviceCount;
-
-        if(((int)tempAvg)%2) HWiface::turnHeaterOn();
-        else HWiface::turnHeaterOff();
-    }*/
     return 0;
-}
-
-void indicateAll(uint16_t deviceCount, const float & temp)
-{
-    indicateCount(deviceCount);
-    indicateCount((int16_t)temp % 20); // todo fix temp indication
-    indicateCount((int16_t)(temp * 10) % 10);
-    _delay_ms(1500);
-}
-
-void indicateCount(uint16_t count)
-{
-    HWiface::turnOneWireLineOff();
-    _delay_ms(1000);
-
-    for(; 0 < count; count--) {
-        HWiface::turnOneWireLineOn();
-        _delay_ms(250);
-        HWiface::turnOneWireLineOff();
-        _delay_ms(250);
-    }
 }

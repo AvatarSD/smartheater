@@ -3,32 +3,26 @@
 
 #include <inttypes.h>
 
-
-namespace settingsinternal
-{
-
-enum RomStatus {
+enum SensorStatusEnum {
     NoAvailable = 0x00,
     Disable = 0x01,
     Active = 0x02,
     NoResponse = 0x03
 };
 
-
-
+namespace settingsinternal
+{
 
 void setDeviceCount(uint8_t count);
 void setTempAvg(const float & temp);
 float getRequiredTemp();
 uint8_t getI2cAddress();
 
-
 void setSensorRom(uint8_t num, const uint8_t * rom);
-void setSensorStatus(uint8_t num, RomStatus status);
+void setSensorStatus(uint8_t num, SensorStatusEnum status);
 void setSensorTemp(uint8_t num, const float & temp);
 const uint8_t * getSensorRom(uint8_t num);
-RomStatus getSensorStatus(uint8_t num);
-
+SensorStatusEnum getSensorStatus(uint8_t num);
 
 
 }
@@ -42,7 +36,6 @@ void setRequiredTemp(uint8_t temp, uint8_t pos);
 uint8_t getTempAvg(uint8_t pos);
 uint8_t getGUID(uint8_t pos);
 uint8_t getI2cAddress();
-
 
 uint8_t getSensorRom(uint8_t num, uint8_t pos);
 uint8_t getSensorTemp(uint8_t num, uint8_t pos);

@@ -62,7 +62,7 @@ void setSensorRom(uint8_t num, const uint8_t * rom)
     eeprom_write_block(rom, backstagemem::sensorNodes[num].rom, ROM_SIZE);
 }
 
-void setSensorStatus(uint8_t num, RomStatus status)
+void setSensorStatus(uint8_t num, SensorStatusEnum status)
 {
     eeprom_write_byte(&backstagemem::sensorNodes[num].status, (uint8_t)status);
 }
@@ -79,11 +79,11 @@ const uint8_t * getSensorRom(uint8_t num)
     return rom;
 }
 
-RomStatus getSensorStatus(uint8_t num)
+SensorStatusEnum getSensorStatus(uint8_t num)
 {
-    return (RomStatus)eeprom_read_byte(&backstagemem::sensorNodes[num].status);
+    return (SensorStatusEnum)eeprom_read_byte(
+               &backstagemem::sensorNodes[num].status);
 }
-
 
 }
 
@@ -135,7 +135,7 @@ uint8_t getSensorRom(uint8_t num, uint8_t pos)
 
 uint8_t getSensorTemp(uint8_t num, uint8_t pos)
 {
-    return eeprom_read_byte(((uint8_t *)&backstagemem::sensorTemps[num]) + pos);
+    return (uint8_t)(backstagemem::sensorTemps[num] >> (8 * pos)) & 0xff;
 }
 
 uint8_t getSensorStatus(uint8_t num)
@@ -147,6 +147,5 @@ void setSensorStatus(uint8_t num, uint8_t status)
 {
     eeprom_write_byte(&backstagemem::sensorNodes[num].status, status);
 }
-
 
 }
