@@ -156,19 +156,22 @@ class MainMem : public Composite<Header, _res_, Nodes> {};
 static_assert(sizeof(MainMem) == 256, "MainMen is not 256bytes in size");
 typedef MainMem MainMemore;
 
+namespace memory
+{
 
-
-int8_t memory::write(uint8_t addr, uint8_t data)
+int8_t write(uint8_t addr, uint8_t data)
 {
     return MainMemore::write(addr, data);
 }
 
-int16_t memory::read(uint8_t addr)
+int16_t read(uint8_t addr)
 {
     return MainMemore::read(addr);
 }
 
-uint16_t memory::mapsize()
+uint16_t mapsize()
 {
     return sizeof(MainMemore);
+}
+
 }

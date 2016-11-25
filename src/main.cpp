@@ -7,7 +7,7 @@
 
 
 
-//#include <server.h>
+#include <server.h>
 
 
 
@@ -20,15 +20,16 @@ void indicateCount(int16_t count);
 
 int main()
 {
+    HWiface::init();
+
     sei();
 
-    //I2CSlaveServer * server = I2CSlaveServer::getInstance();
-    //server->setup();
-
-    //    while(1);
+    I2CSlaveServer * server = I2CSlaveServer::getInstance();
+    server->setup();
 
     OneWire wire(ONEWIREPIN);
     DallasTemperature sensors(&wire);
+
     while(1) {
         HWiface::turnOneWireLineOn();
         sensors.begin();
