@@ -4,6 +4,8 @@
 #include "ADC/adc.h"
 #include <conf.h>
 
+#include <avr/interrupt.h>
+
 
 #define setbit(port,num,onoff) port=(onoff<<num)|(port&~(1<<num))
 
@@ -11,6 +13,7 @@ void HWiface::init()
 {
     turnHeaterOff();
     Analog::init();
+
 }
 
 
