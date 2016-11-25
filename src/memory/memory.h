@@ -32,7 +32,10 @@
  *
  */
 
-
+#define GUID_SIZE 16
+#define ROM_SIZE 8
+#define RESERVED_SIZE 12
+#define MAX_SENSORS 20
 
 namespace memory
 {
@@ -40,5 +43,7 @@ int8_t write(uint8_t addr, uint8_t data);
 int16_t read(uint8_t addr);
 uint16_t mapsize();
 }
+
+
 
 #endif

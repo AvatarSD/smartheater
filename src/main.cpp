@@ -2,20 +2,12 @@
 #include <DallasTemperature.h>
 #include <hwiface.h>
 #include <conf.h>
-
-#include <stdlib.h>
-
-
-
 #include <server.h>
-
-
-
-#define REQUIRED_TEMP 20
+#include <settings.h>
 
 
 void indicateAll(uint16_t deviceCount, const float & temp);
-void indicateCount(int16_t count);
+void indicateCount(uint16_t count);
 
 
 int main()
@@ -35,12 +27,18 @@ int main()
         sensors.begin();
         sensors.requestTemperatures();
         uint16_t deviceCount = sensors.getDeviceCount();
+        settingsinternal::setDeviceCount(deviceCount);
+
         float tempAvg = 0;
         for(uint16_t i = 0; i < deviceCount; i++)
             tempAvg += sensors.getTempCByIndex(i);
         tempAvg /= deviceCount;
-        if((tempAvg < REQUIRED_TEMP) && (deviceCount > 0)) HWiface::turnHeaterOn();
+        settingsinternal::setTempAvg(tempAvg);
+
+        if((tempAvg < settingsinternal::getRequiredTemp()) &&
+                (deviceCount > 0)) HWiface::turnHeaterOn();
         else HWiface::turnHeaterOff();
+
         indicateAll(deviceCount, tempAvg);
     }
     /* while(1)
@@ -83,14 +81,13 @@ int main()
 void indicateAll(uint16_t deviceCount, const float & temp)
 {
     indicateCount(deviceCount);
-    indicateCount((int16_t)temp % 20);
+    indicateCount((int16_t)temp % 20); // todo fix temp indication
     indicateCount((int16_t)(temp * 10) % 10);
     _delay_ms(1500);
 }
 
-void indicateCount(int16_t count)
+void indicateCount(uint16_t count)
 {
-    count = abs(count);
     HWiface::turnOneWireLineOff();
     _delay_ms(1000);
 

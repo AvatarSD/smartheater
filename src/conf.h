@@ -30,8 +30,6 @@
 // num of data line pin
 #define ONEWIREPIN 3
 //eeeeeeenable time
-//#define TIME_TO_READ_MS 20
-
 
 
 
