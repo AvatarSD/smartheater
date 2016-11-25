@@ -11,7 +11,6 @@ int main()
 {
     HWiface::init();
 
-
     I2CSlaveServer * server = I2CSlaveServer::getInstance();
     server->setup();
 

@@ -21,7 +21,7 @@ uint8_t getI2cAddress();
 void setSensorRom(uint8_t num, const uint8_t * rom);
 void setSensorStatus(uint8_t num, SensorStatusEnum status);
 void setSensorTemp(uint8_t num, const float & temp);
-const uint8_t * getSensorRom(uint8_t num);
+void getSensorRom(uint8_t num, uint8_t * rom);
 SensorStatusEnum getSensorStatus(uint8_t num);
 
 uint8_t getDeviceCount();

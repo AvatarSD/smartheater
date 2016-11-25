@@ -57,7 +57,7 @@ void CoreLogic::mainCycle()
         if(settingsinternal::getSensorStatus(i) == SensorStatusEnum::Disable)
             continue;
 
-        settingsinternal::getSensorRom(i);
+        settingsinternal::getSensorRom(i, deviceAddress);
         float tempTmp = sensors.getTempC((uint8_t *)deviceAddress);
 
         if(tempTmp == DEVICE_DISCONNECTED_C) {

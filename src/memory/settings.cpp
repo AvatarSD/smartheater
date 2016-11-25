@@ -72,11 +72,9 @@ void setSensorTemp(uint8_t num, const float & temp)
     backstagemem::sensorTemps[num] = (int16_t)(temp * 16);
 }
 
-const uint8_t * getSensorRom(uint8_t num)
+void getSensorRom(uint8_t num, uint8_t * rom)
 {
-    static uint8_t rom[ROM_SIZE];
     eeprom_read_block(rom, backstagemem::sensorNodes[num].rom, ROM_SIZE);
-    return rom;
 }
 
 SensorStatusEnum getSensorStatus(uint8_t num)
