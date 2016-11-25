@@ -25,6 +25,10 @@ public:
 
     static Error write(Address addr, uint8_t data, Num num)
     {
+        if(data == MULTICAST_ADDRESS) {
+            settingsextetnal::setI2cAddress(data);
+            return OK;
+        }
         newAddr = data;
         flag = true;
         return OK;
