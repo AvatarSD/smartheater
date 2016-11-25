@@ -98,9 +98,7 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        if(addr == 1)
-            return num;
-        return 'r';
+        return settingsextetnal::getSensorRom(num, addr);
     }
 };
 class Temp : public Composite<uint16_t>
@@ -112,7 +110,7 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return 't';
+        return settingsextetnal::getSensorTemp(num, addr);
     }
 };
 class SensorStatus : public Composite<uint8_t>
@@ -120,11 +118,12 @@ class SensorStatus : public Composite<uint8_t>
 public:
     static Error write(Address addr, uint8_t data, Num num)
     {
+        settingsextetnal::setSensorStatus(num, data);
         return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return 's';
+        return settingsextetnal::getSensorStatus(num);
     }
 };
 

@@ -1,19 +1,23 @@
 #include "settings.h"
 #include <avr/eeprom.h>
 #include "memory.h"
+#include <conf.h>
 
 
 
-#define REQUIRED_TEMP 20*16
-#define I2C_SLAVE_ADDRESS 0x04 // todo for test
+
+struct SensorNode {
+    uint8_t rom[ROM_SIZE];
+    uint8_t status;
+};
 
 namespace backstagemem
 {
 
-int16_t EEMEM requiredTemp = REQUIRED_TEMP;
+int16_t EEMEM requiredTemp = REQUIRED_TEMP * 16;
 uint8_t EEMEM slaveAddress = I2C_SLAVE_ADDRESS;
 
-uint8_t EEMEM GUID[GUID_SIZE] = {
+uint8_t EEMEM GUID[GUID_SIZE] = { // TODO autogen guid
     0x66, 0x11, 0x70, 0x8B,
     0xC4, 0x76, 0x41, 0x96,
     0x91, 0x12, 0xA0, 0x91,
@@ -23,8 +27,11 @@ uint8_t EEMEM GUID[GUID_SIZE] = {
 uint8_t deviceCount = 0;
 int16_t tempAvg = 0;
 
+SensorNode EEMEM sensorNodes[MAX_SENSORS];
+int16_t sensorTemps[MAX_SENSORS];
 
 }
+
 
 
 namespace settingsinternal
@@ -50,8 +57,35 @@ void setTempAvg(const float & temp)
     backstagemem::tempAvg = (int16_t)(temp * 16);
 }
 
+void setSensorRom(uint8_t num, const uint8_t * rom)
+{
+    eeprom_write_block(rom, backstagemem::sensorNodes[num].rom, ROM_SIZE);
 }
 
+void setSensorStatus(uint8_t num, RomStatus status)
+{
+    eeprom_write_byte(&backstagemem::sensorNodes[num].status, (uint8_t)status);
+}
+
+void setSensorTemp(uint8_t num, const float & temp)
+{
+    backstagemem::sensorTemps[num] = (int16_t)(temp * 16);
+}
+
+const uint8_t * getSensorRom(uint8_t num)
+{
+    static uint8_t rom[ROM_SIZE];
+    eeprom_read_block(rom, backstagemem::sensorNodes[num].rom, ROM_SIZE);
+    return rom;
+}
+
+RomStatus getSensorStatus(uint8_t num)
+{
+    return (RomStatus)eeprom_read_byte(&backstagemem::sensorNodes[num].status);
+}
+
+
+}
 
 
 
@@ -94,6 +128,25 @@ void setRequiredTemp(uint8_t temp, uint8_t pos)
     }
 }
 
+uint8_t getSensorRom(uint8_t num, uint8_t pos)
+{
+    return eeprom_read_byte(&backstagemem::sensorNodes[num].rom[pos]);
+}
+
+uint8_t getSensorTemp(uint8_t num, uint8_t pos)
+{
+    return eeprom_read_byte(((uint8_t *)&backstagemem::sensorTemps[num]) + pos);
+}
+
+uint8_t getSensorStatus(uint8_t num)
+{
+    return eeprom_read_byte(&backstagemem::sensorNodes[num].status);
+}
+
+void setSensorStatus(uint8_t num, uint8_t status)
+{
+    eeprom_write_byte(&backstagemem::sensorNodes[num].status, status);
+}
 
 
 }

@@ -29,8 +29,10 @@
 #define SENS_OFFSTATE true
 // num of data line pin
 #define ONEWIREPIN 3
-//eeeeeeenable time
 
+//settings
+#define REQUIRED_TEMP 20
+#define I2C_SLAVE_ADDRESS 0x04 // TODO for test
 
 
 #endif // CONF_H
