@@ -74,7 +74,7 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return 'S';
+        return settingsextetnal::getDeviceModeStatus();
     }
 };
 class Control : public Composite<uint8_t>
@@ -82,6 +82,7 @@ class Control : public Composite<uint8_t>
 public:
     static Error write(Address addr, uint8_t data, Num num)
     {
+        settingsextetnal::setDeviceMode(data);
         return OK;
     }
     static ReadType read(Address addr, Num num = 0)

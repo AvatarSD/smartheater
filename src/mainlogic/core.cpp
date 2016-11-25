@@ -7,7 +7,7 @@
 
 CoreLogic::CoreLogic() : wire(ONEWIREPIN), sensors(&wire)
 {
-
+    settingsinternal::scanEEpromForRomsCount();
 }
 
 void CoreLogic::eraceeeprom()
@@ -21,6 +21,19 @@ void CoreLogic::eraceeeprom()
         settingsinternal::setSensorTemp(i, 0);
     }
     settingsinternal::setDeviceCount(0);
+}
+
+CoreLogic * CoreLogic::instance()
+{
+    static CoreLogic logic;
+    return &logic;
+}
+
+void CoreLogic::heaterHandler(const float & tempAvg, uint16_t deviceReaded)
+{
+    if((tempAvg < settingsinternal::getRequiredTemp()) &&
+            (deviceReaded > 0)) HWiface::turnHeaterOn();
+    else HWiface::turnHeaterOff();
 }
 
 void CoreLogic::searchSensors()
@@ -75,10 +88,8 @@ void CoreLogic::mainCycle()
     settingsinternal::setTempAvg(tempAvg);
 
 
-    if((tempAvg < settingsinternal::getRequiredTemp()) &&
-            (deviceReaded > 0)) HWiface::turnHeaterOn();
-    else HWiface::turnHeaterOff();
-
+    if(settingsinternal::getDeviceModeStatus() == Auto)
+        heaterHandler(tempAvg, deviceReaded);
 
     indicateAll(deviceReaded, tempAvg);
 }

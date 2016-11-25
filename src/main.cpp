@@ -14,14 +14,12 @@ int main()
     I2CSlaveServer * server = I2CSlaveServer::getInstance();
     server->setup();
 
-    CoreLogic logic;
+    CoreLogic * logic = CoreLogic::instance();
 
     sei();
 
-    logic.searchSensors();
-
     while(1)
-        logic.mainCycle();
+        logic->mainCycle();
 
     return 0;
 }

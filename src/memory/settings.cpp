@@ -2,6 +2,8 @@
 #include <avr/eeprom.h>
 #include "memory.h"
 #include <conf.h>
+#include <hwiface.h>
+#include <core.h>
 
 
 
@@ -29,6 +31,8 @@ int16_t tempAvg = 0;
 
 SensorNode EEMEM sensorNodes[MAX_SENSORS];
 int16_t sensorTemps[MAX_SENSORS];
+
+HeaterMode EEMEM deviceStatus = HeaterMode::DisableHeater;
 
 }
 
@@ -86,6 +90,20 @@ SensorStatusEnum getSensorStatus(uint8_t num)
 uint8_t getDeviceCount()
 {
     return settingsextetnal::getDeviceCount();
+}
+
+HeaterMode getDeviceModeStatus()
+{
+    return (HeaterMode) settingsextetnal::getDeviceModeStatus();
+}
+
+void scanEEpromForRomsCount()
+{
+    uint8_t i = 0;
+    for(; i < MAX_SENSORS; i++)
+        if(getSensorStatus(i) == NoAvailable)
+            break;
+    setDeviceCount(i);
 }
 
 }
@@ -149,6 +167,30 @@ uint8_t getSensorStatus(uint8_t num)
 void setSensorStatus(uint8_t num, uint8_t status)
 {
     eeprom_write_byte(&backstagemem::sensorNodes[num].status, status);
+}
+
+void setDeviceMode(uint8_t status)
+{
+    if(status == Search) {
+        CoreLogic::instance()->searchSensors();
+        return;
+    } else if(status == Erace) {
+        CoreLogic::instance()->eraceeeprom();
+        return;
+    }
+
+    else if(status == EnableHeater)
+        HWiface::turnHeaterOn();
+    else if(status == DisableHeater)
+        HWiface::turnHeaterOff();
+
+
+    eeprom_write_byte((uint8_t *)&backstagemem::deviceStatus, status);
+}
+
+uint8_t getDeviceModeStatus()
+{
+    return eeprom_read_byte((uint8_t *)&backstagemem::deviceStatus);
 }
 
 }

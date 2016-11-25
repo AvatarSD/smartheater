@@ -35,5 +35,22 @@
 #define REQUIRED_TEMP 20
 #define I2C_SLAVE_ADDRESS 0x04 // TODO for test
 
+enum SensorStatusEnum {
+	NoAvailable = 0x00,
+	Disable = 0x01,
+	Active = 0x02,
+	NoResponse = 0x03
+};
+
+enum HeaterMode {
+	DisableHeater = 0b00,
+	EnableHeater = 0b01,
+	Auto = 0b10
+};
+
+enum SearchMode{
+	Search = 0b100,
+	Erace = 0b1000
+};
 
 #endif // CONF_H
