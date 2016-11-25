@@ -35,6 +35,9 @@
 #define REQUIRED_TEMP 20
 #define I2C_SLAVE_ADDRESS 0x04 // TODO for test
 
+#define MULTICAST_ADDRESS 0x03
+
+
 enum SensorStatusEnum {
 	NoAvailable = 0x00,
 	Disable = 0x01,

@@ -130,7 +130,8 @@ uint8_t getDeviceCount()
 
 uint8_t getI2cAddress()
 {
-    return settingsinternal::getI2cAddress();
+    return CoreLogic::instance()->getServer()->getAddress();
+    //return settingsinternal::getI2cAddress();
 }
 
 uint8_t getRequiredTemp(uint8_t pos)
@@ -191,6 +192,12 @@ void setDeviceMode(uint8_t status)
 uint8_t getDeviceModeStatus()
 {
     return eeprom_read_byte((uint8_t *)&backstagemem::deviceStatus);
+}
+
+void setI2cAddress(uint8_t addr)
+{
+    eeprom_write_byte(&backstagemem::slaveAddress, addr);
+    CoreLogic::instance()->getServer()->setAddress(addr);
 }
 
 }

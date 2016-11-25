@@ -1,7 +1,7 @@
 
 #include <hwiface.h>
 #include <server.h>
-
+#include <settings.h>
 #include <core.h>
 
 
@@ -12,9 +12,9 @@ int main()
     HWiface::init();
 
     I2CSlaveServer * server = I2CSlaveServer::getInstance();
-    server->setup();
+    server->setup(settingsinternal::getI2cAddress());
 
-    CoreLogic * logic = CoreLogic::instance();
+    CoreLogic * logic = CoreLogic::instance(server);
 
     sei();
 

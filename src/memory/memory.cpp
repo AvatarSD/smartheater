@@ -4,6 +4,7 @@
 #include <conf.h>
 
 
+
 class GUID : public Composite<uint8_t[GUID_SIZE]>
 {
 public:
@@ -19,15 +20,26 @@ public:
 class SlaveAddress : public Composite<uint8_t>
 {
 public:
+    static uint8_t newAddr;
+    static bool flag;
+
     static Error write(Address addr, uint8_t data, Num num)
     {
+        newAddr = data;
+        flag = true;
         return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
+        if(flag)
+            settingsextetnal::setI2cAddress(newAddr);
+        flag = false;
         return settingsextetnal::getI2cAddress();
     }
 };
+uint8_t SlaveAddress::newAddr = 0;
+bool SlaveAddress::flag = false;
+
 class RequiredTemp : public Composite<int16_t>
 {
 public:

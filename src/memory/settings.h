@@ -38,6 +38,7 @@ uint8_t getSensorStatus(uint8_t num);
 void setSensorStatus(uint8_t num, uint8_t status);
 void setDeviceMode(uint8_t status);
 uint8_t getDeviceModeStatus();
+void setI2cAddress(uint8_t addr);
 
 }
 

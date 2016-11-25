@@ -4,9 +4,11 @@
 #include <conf.h>
 #include <hwiface.h>
 
+CoreLogic * CoreLogic::logic = nullptr;
 
-CoreLogic::CoreLogic() : wire(ONEWIREPIN), sensors(&wire)
+CoreLogic::CoreLogic(I2CSlaveServer * server) : wire(ONEWIREPIN), sensors(&wire)
 {
+    this->server = server;
     settingsinternal::scanEEpromForRomsCount();
 }
 
@@ -23,10 +25,21 @@ void CoreLogic::eraceeeprom()
     settingsinternal::setDeviceCount(0);
 }
 
+CoreLogic * CoreLogic::instance(I2CSlaveServer * server)
+{
+    static CoreLogic logic(server);
+    CoreLogic::logic = &logic;
+    return CoreLogic::logic;
+}
+
 CoreLogic * CoreLogic::instance()
 {
-    static CoreLogic logic;
-    return &logic;
+    return CoreLogic::logic;
+}
+
+I2CSlaveServer * CoreLogic::getServer() const
+{
+    return server;
 }
 
 void CoreLogic::heaterHandler(const float & tempAvg, uint16_t deviceReaded)
