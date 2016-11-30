@@ -3,7 +3,12 @@
 #include <util/delay.h>
 #include <hwiface.h>
 
-void indicateAll(uint16_t deviceCount, const float & temperature)
+Indication::Indication(HWiface & hardware) : hardware(&hardware)
+{
+
+}
+
+void Indication::indicateAll(uint16_t deviceCount, const float & temperature)
 {
     uint16_t temp = (temperature + 100) * 10;
     indicateCount(deviceCount);
@@ -12,15 +17,15 @@ void indicateAll(uint16_t deviceCount, const float & temperature)
     _delay_ms(1200);
 }
 
-void indicateCount(uint16_t count)
+void Indication::indicateCount(uint16_t count)
 {
-    HWiface::turnOneWireLineOff();
+    hardware->turnOneWireLineOff();
     _delay_ms(1000);
 
     for(; 0 < count; count--) {
-        HWiface::turnOneWireLineOn();
+        hardware->turnOneWireLineOn();
         _delay_ms(250);
-        HWiface::turnOneWireLineOff();
+        hardware->turnOneWireLineOff();
         _delay_ms(250);
     }
 }
