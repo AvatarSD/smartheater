@@ -70,9 +70,10 @@ void SettingsExternal::setICoreState(ICoreState * statemachine)
     state = statemachine;
 }
 
+
 uint8_t SettingsExternal::getDeviceCount()
 {
-    mem->getDeviceCount();
+    return mem->getDeviceCount();
 }
 
 uint8_t SettingsExternal::getDeviceModeStatus()
@@ -125,6 +126,7 @@ void SettingsExternal::setSensorStatus(uint8_t num, uint8_t status)
     mem->setSensorStatus(num, status);
 }
 
+
 void SettingsExternal::setI2cAddress(uint8_t addr)
 {
     mem->setI2cAddress(addr);
@@ -134,5 +136,6 @@ void SettingsExternal::setI2cAddress(uint8_t addr)
 void SettingsExternal::setDeviceMode(uint8_t status)
 {
     state->setDeviceMode(status);
-    mem->setDeviceMode(status);
+    if(status > 0b11)
+        mem->setDeviceMode(status);
 }
