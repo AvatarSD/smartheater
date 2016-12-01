@@ -27,7 +27,14 @@ enum SearchMode {
     Erace = 0b1000
 };
 
-class ICoreState;
+class ICoreState
+{
+public:
+
+    virtual void setI2cAddress(uint8_t addr) = 0;
+    virtual void setDeviceMode(uint8_t status) = 0;
+};
+
 class Settings;
 
 class SettingsInternal
