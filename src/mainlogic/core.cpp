@@ -1,7 +1,6 @@
 #include "core.h"
 #include <settings.h>
 #include <indication.h>
-#include <conf.h>
 #include <hwiface.h>
 #include <DallasTemperature.h>
 #include <server.h>

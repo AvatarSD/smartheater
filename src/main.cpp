@@ -1,12 +1,12 @@
 
 #include <hwiface.h>
+#include <memory.h>
 #include <server.h>
 #include <settings.h>
 #include <core.h>
 #include <usiTwiSlave.h>
 #include <usi.h>
 #include <DallasTemperature.h>
-#include <memory.h>
 #include <corestateserver.h>
 #include <indication.h>
 #include <mainmem.h>
@@ -28,10 +28,10 @@ int main()
 
 
     SettingsExternal settingsExt(*eeprommem);
-    Memory<MainMem> memory(settingsExt);
+    MemoryMap memory(settingsExt);
 
-    UsiTwiSlave network(*usi);
-    I2CSlaveServer server(memory, network, I2C_SLAVE_ADDRESS);
+    UsiTwiSlave network(usi);
+    I2CSlaveServer server(&memory, &network, I2C_SLAVE_ADDRESS, MULTICAST_ADDRESS);
 
     DallasTemperature sensors(&wire);
 
