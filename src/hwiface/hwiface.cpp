@@ -2,7 +2,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "ADC/adc.h"
-#include <conf.h>
+//#include <conf.h>
 
 #include <avr/interrupt.h>
 

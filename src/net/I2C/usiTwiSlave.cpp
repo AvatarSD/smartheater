@@ -1,33 +1,34 @@
 #include "usi.h"
 #include "usiTwiSlave.h"
-#include <conf.h>
 
 
-UsiTwiSlave::UsiTwiSlave()
+UsiTwiSlave::UsiTwiSlave(USI * usi) : usi(usi)
 {
     startCounter = 0;
     slaveAddress = 0;
-    USI::overflowHandler = &overflowVec;
-    USI::startConditionHandler = &startConditionVec;
+    multicastAddress = 0;
+    this->usi->setIsrHandler(this);
 }
 
-UsiTwiSlave * UsiTwiSlave::getInstance()
+void UsiTwiSlave::init(iServer * server, uint8_t address,
+                       uint8_t multicastAddress)
 {
-    static UsiTwiSlave instance;
-    return &instance;
-}
-
-void UsiTwiSlave::init(uint8_t address)
-{
+    onEventHandler(server);
     setAddress(address);
+    setMulticastAddress(multicastAddress);
 
     SET_USI_TO_TWI_START_CONDITION_MODE();
     // set SCL high
-    USI::disableForceHoldSCL();
+    usi->disableForceHoldSCL();
     // set SDA high
-    USI::disableForceHoldSDA();
+    usi->disableForceHoldSDA();
     // Set SDA as input
-    USI::enableSCLOpenDrain();
+    usi->enableSCLOpenDrain();
+}
+
+void UsiTwiSlave::onEventHandler(iServer * server)
+{
+    this->server = server;
 }
 
 uint8_t UsiTwiSlave::getAddress()
@@ -40,62 +41,72 @@ void UsiTwiSlave::setAddress(uint8_t addr)
     slaveAddress = addr;
 }
 
+uint8_t UsiTwiSlave::getMulticastAddress()
+{
+    return multicastAddress;
+}
+
+void UsiTwiSlave::setMulticastAddress(uint8_t addr)
+{
+    multicastAddress = addr;
+}
+
 
 void UsiTwiSlave::SET_USI_TO_TWI_START_CONDITION_MODE()
 {
     /* set USI counter to shift 1 bit */
     /* clear all interrupt flags, except Start Cond */
-    USI::setStatus(1, 1, 1, 1, 0x00);
+    usi->setStatus(1, 1, 1, 1, 0x00);
     /* set SDA as input */
-    USI::disableSDAOpenDrain();
+    usi->disableSDAOpenDrain();
     /* enable Start Condition Interrupt, disable Overflow Interrupt */
-    USI::enableStartInt();
-    USI::disableOvfInt();
+    usi->enableStartInt();
+    usi->disableOvfInt();
     /* set USI in Two-wire mode, no USI Counter overflow hold */
-    USI::setWireMode(WireMode::TWI);
+    usi->setWireMode(WireMode::TWI);
     /* Shift Register Clock Source = External, positive edge */
     /* 4-Bit Counter: Source = external,both edges */
-    USI::setClockMode(ClockMode::EXT_POS);
+    usi->setClockMode(ClockMode::EXT_POS);
 }
 
 void UsiTwiSlave::SET_USI_TO_SEND_ACK()
 {
     /* prepare ACK */
-    USI::data = 0;
+    usi->data = 0;
     /* set SDA as output */
-    USI::enableSDAOpenDrain();
+    usi->enableSDAOpenDrain();
     /* set USI counter to shift 1 bit */
     /* clear all interrupt flags, except Start Cond */
-    USI::setStatus(0, 1, 1, 1, 0x0E);
+    usi->setStatus(0, 1, 1, 1, 0x0E);
 }
 
 void UsiTwiSlave::SET_USI_TO_READ_ACK()
 {
     /* set SDA as input */
-    USI::disableSDAOpenDrain();
+    usi->disableSDAOpenDrain();
     /* prepare ACK */
-    USI::data = 0; //USIDR = 0;
+    usi->data = 0; //USIDR = 0;
     /* set USI counter to shift 1 bit */
     /* clear all interrupt flags, except Start Cond */
-    USI::setStatus(0, 1, 1, 1, 0x0E);
+    usi->setStatus(0, 1, 1, 1, 0x0E);
 }
 
 void UsiTwiSlave::SET_USI_TO_SEND_DATA()
 {
     /* set SDA as output */
-    USI::enableSDAOpenDrain();
+    usi->enableSDAOpenDrain();
     /* set USI counter to shift 1 bit */
     /* clear all interrupt flags, except Start Cond */
-    USI::setStatus(0, 1, 1, 1, 0x00);
+    usi->setStatus(0, 1, 1, 1, 0x00);
 }
 
 void UsiTwiSlave::SET_USI_TO_READ_DATA()
 {
     /* set SDA as input */
-    USI::disableSDAOpenDrain();
+    usi->disableSDAOpenDrain();
     /* set USI counter to shift 1 bit */
     /* clear all interrupt flags, except Start Cond */
-    USI::setStatus(0, 1, 1, 1, 0x00);
+    usi->setStatus(0, 1, 1, 1, 0x00);
 }
 
 
@@ -103,7 +114,7 @@ void UsiTwiSlave::startConditionHandler()
 {
     // set default starting conditions for new TWI package
     overflowState = CHECK_ADDRESS;
-    USI::disableSDAOpenDrain();
+    usi->disableSDAOpenDrain();
     startCounter = 0;
 
     // wait for SCL to go low to ensure the Start Condition has completed (the
@@ -111,25 +122,24 @@ void UsiTwiSlave::startConditionHandler()
     // the interrupt to prevent waiting forever - don't use USISR to test for Stop
     // Condition as in Application Note AVR312 because the Stop Condition Flag is
     // going to be set from the last TWI sequence
-    while(USI::getSCLState() && !USI::getSDAState());
+    while(usi->getSCLState() && !usi->getSDAState());
 
-    if(!USI::getSDAState()) {
+    if(!usi->getSDAState()) {
         // a Stop Condition did not occur
-        USI::enableOvfInt();
-        USI::setWireMode(WireMode::TWI_WAIT);
+        usi->enableOvfInt();
+        usi->setWireMode(WireMode::TWI_WAIT);
     } else {
         // a Stop Condition did occur
-        USI::disableOvfInt();
-        USI::setWireMode(WireMode::TWI);
+        usi->disableOvfInt();
+        usi->setWireMode(WireMode::TWI);
     }
 
-    USI::setStatus(1, 1, 1, 1, 0x00);
+    usi->setStatus(1, 1, 1, 1, 0x00);
 }
-
 
 void UsiTwiSlave::overflowHandler()
 {
-    uint8_t dataRegBuff = USI::data;
+    uint8_t dataRegBuff = usi->data;
 
     switch(overflowState) {
 
@@ -140,13 +150,13 @@ void UsiTwiSlave::overflowHandler()
         bool rw = dataRegBuff & 0x01;
         dataRegBuff >>= 1;
 
-        if((dataRegBuff == MULTICAST_ADDRESS) || (dataRegBuff == slaveAddress)) {
+        if((dataRegBuff == multicastAddress) || (dataRegBuff == slaveAddress)) {
             if(!rw) {
                 overflowState = RECEIVE_DATA; // master want writing - receiving
                 SET_USI_TO_SEND_ACK();
                 break;
             }
-            if((dataRegBuff == MULTICAST_ADDRESS) && (slaveAddress != MULTICAST_ADDRESS))  {
+            if((dataRegBuff == multicastAddress) && (slaveAddress != multicastAddress))  {
                 SET_USI_TO_TWI_START_CONDITION_MODE();
                 break;
             }
@@ -168,7 +178,7 @@ void UsiTwiSlave::overflowHandler()
     case SEND_DATA: {
         int16_t tmp = requestCall(startCounter++);
         if(tmp >= 0)
-            USI::data = tmp;
+            usi->data = tmp;
         else {
             SET_USI_TO_TWI_START_CONDITION_MODE();
             return;
@@ -223,34 +233,14 @@ void UsiTwiSlave::overflowHandler()
 
 int8_t UsiTwiSlave::receiveCall(uint8_t num, uint8_t data)
 {
-    if(onReceiver)
-        return onReceiver(num, data);
+    if(server)
+        return server->onReceiver(num, data);
     return ERR;
 }
 
 int16_t UsiTwiSlave::requestCall(uint8_t num)
 {
-    if(onRequest)
-        return onRequest(num);
+    if(server)
+        return server->onRequest(num);
     return ERR;
-}
-
-void UsiTwiSlave::onReceiveSetHandler(ReceiveHandler func)
-{
-    onReceiver = func;
-}
-
-void UsiTwiSlave::onRequestSetHandler(RequestHandler func)
-{
-    onRequest = func;
-}
-
-void UsiTwiSlave::startConditionVec()
-{
-    getInstance()->startConditionHandler();
-}
-
-void UsiTwiSlave::overflowVec()
-{
-    getInstance()->overflowHandler();
 }
