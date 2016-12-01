@@ -134,6 +134,6 @@ void SettingsExternal::setI2cAddress(uint8_t addr)
 void SettingsExternal::setDeviceMode(uint8_t status)
 {
     state->setDeviceMode(status);
-    if(status > 0b11)
+    if(status < 0b100)
         mem->setDeviceMode(status);
 }
