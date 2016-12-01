@@ -11,7 +11,7 @@
 #include <mainmem.h>
 
 
-// num of data line pin
+// num of data line pin, hardware-defined
 #define ONEWIREPIN 3
 
 int main()
@@ -25,14 +25,12 @@ int main()
 
     Indication leds(*hardware);
 
-
     SettingsExternal settingsExt(*eeprommem);
     MemoryMap memory(settingsExt);
 
     UsiTwiSlave network(usi);
-    network.setAddress(I2C_SLAVE_ADDRESS);
-    network.setMulticastAddress(MULTICAST_ADDRESS);
     I2CSlaveServer server(&network, &memory);
+    network.init();
 
     DallasTemperature sensors(&wire);
 
