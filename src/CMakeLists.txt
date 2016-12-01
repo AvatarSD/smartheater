@@ -21,11 +21,6 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags}")
 
 
-#add_definitions("-DARDUINO=101")
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Arduino/arduino ${CMAKE_CURRENT_SOURCE_DIR}/Arduino/variants/gemma)
-#file(GLOB_RECURSE ARDUINO_SRC ${CMAKE_CURRENT_SOURCE_DIR}/Arduino/arduino/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Arduino/arduino/*.c)
-
-
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/temp/OneWire
@@ -55,5 +50,5 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
 	avr-objcopy -j .eeprom --change-section-lma .eeprom=0 -O ihex ${PROJECT_NAME} ${PROJECT_NAME}_eeprom.hex)
 
 #program to board
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-	avrdude -v -e -p t85 -c dragon_dw -Uflash:w:${PROJECT_NAME}.hex:i -Ueeprom:w:${PROJECT_NAME}_eeprom.hex)
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
+#	avrdude -v -e -p t85 -c dragon_dw -Uflash:w:${PROJECT_NAME}.hex:i -Ueeprom:w:${PROJECT_NAME}_eeprom.hex)

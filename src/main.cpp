@@ -30,7 +30,9 @@ int main()
     MemoryMap memory(settingsExt);
 
     UsiTwiSlave network(usi);
-    I2CSlaveServer server(&memory, &network, I2C_SLAVE_ADDRESS, MULTICAST_ADDRESS);
+    network.setAddress(I2C_SLAVE_ADDRESS);
+    network.setMulticastAddress(MULTICAST_ADDRESS);
+    I2CSlaveServer server(&network, &memory);
 
     DallasTemperature sensors(&wire);
 

@@ -30,9 +30,8 @@ enum SearchMode {
 class ICoreState
 {
 public:
-
-    virtual void setI2cAddress(uint8_t addr) = 0;
-    virtual void setDeviceMode(uint8_t status) = 0;
+    virtual void setI2cAddress(uint8_t addr) {}
+    virtual void setDeviceMode(uint8_t status) {}
 };
 
 class Settings;
