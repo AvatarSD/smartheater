@@ -23,18 +23,18 @@ int main()
     OneWire wire(ONEWIREPIN);
     auto eeprommem = Settings::instance();
 
-    Indication leds(*hardware);
-
     SettingsExternal settingsExt(*eeprommem);
     MemoryMap memory(settingsExt);
 
+    SettingsInternal settingsInt(*eeprommem);
+
     UsiTwiSlave network(usi);
     I2CSlaveServer server(&network, &memory);
-    network.init();
+    network.init(settingsInt.getI2cAddress(), MULTICAST_ADDR);
 
     DallasTemperature sensors(&wire);
 
-    SettingsInternal settingsInt(*eeprommem);
+    Indication leds(*hardware);
     CoreLogic logic(server, sensors, settingsInt, *hardware, leds);
     settingsExt.setICoreState(&logic);
 

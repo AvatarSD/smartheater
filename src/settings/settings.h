@@ -5,28 +5,6 @@
 #include "eeprom.h"
 
 
-#define RESERVED_SIZE 12
-
-//settings
-#define MAX_SENSORS 20
-#define REQUIRED_TEMP 20
-#define I2C_SLAVE_ADDRESS 0x04 // TODO for test
-
-#define MULTICAST_ADDRESS 0x03
-
-
-
-enum HeaterMode {
-    DisableHeater = 0b00,
-    EnableHeater = 0b01,
-    Auto = 0b10
-};
-
-enum SearchMode {
-    Search = 0b100,
-    Erace = 0b1000
-};
-
 class ICoreState
 {
 public:

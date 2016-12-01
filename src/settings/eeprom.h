@@ -3,10 +3,16 @@
 
 #include <inttypes.h>
 
-
+// hardeare defined settings
 #define GUID_SIZE 16
 #define ROM_SIZE 8
 #define MAX_SENSORS 20
+#define RESERVED_SIZE 12
+#define MAX_SENSORS 20
+
+// here if a default one
+#define MULTICAST_ADDR 0x50
+
 
 enum SensorStatusEnum {
     NoAvailable = 0x00,
@@ -14,6 +20,18 @@ enum SensorStatusEnum {
     Active = 0x02,
     NoResponse = 0x03
 };
+
+enum HeaterMode {
+    DisableHeater = 0b00,
+    EnableHeater = 0b01,
+    Auto = 0b10
+};
+
+enum SearchMode {
+    Search = 0b100,
+    Erace = 0b1000
+};
+
 
 class Settings
 {

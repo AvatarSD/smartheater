@@ -34,7 +34,7 @@
  *
  */
 
-class SettingsExternal;
+
 extern SettingsExternal * settng;
 
 
@@ -58,7 +58,7 @@ public:
 
 	static Error write(Address addr, uint8_t data, Num num)
 	{
-		if(data == MULTICAST_ADDRESS) {
+		if(data == MULTICAST_ADDR) {
 			settng->setI2cAddress(data);
 			return OK;
 		}

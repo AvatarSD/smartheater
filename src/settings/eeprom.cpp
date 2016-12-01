@@ -3,9 +3,10 @@
 
 
 
+
+//default instance for first-time program
+#define I2C_SLAVE_ADDRESS 0x04
 #define REQUIRED_TEMP 20
-#define I2C_SLAVE_ADDRESS 0x04 // TODO for test
-#define MULTICAST_ADDRESS 0x03
 
 
 Settings * Settings::instance()
