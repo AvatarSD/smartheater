@@ -2,7 +2,6 @@
 #define MEMORY_H
 
 #include <inttypes.h>
-#include <mainmem.h>
 #include <server.h>
 
 

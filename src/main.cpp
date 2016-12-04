@@ -1,14 +1,12 @@
 
 #include <hwiface.h>
 #include <memory.h>
-#include <server.h>
 #include <settings.h>
 #include <core.h>
 #include <usiTwiSlave.h>
 #include <usi.h>
 #include <DallasTemperature.h>
 #include <indication.h>
-#include <mainmem.h>
 
 
 // num of data line pin, hardware-defined
