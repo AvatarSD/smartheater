@@ -196,9 +196,9 @@ public:
 };
 
 
+class CommonShared : public Composite<GUID, SlaveAddress> {};
 
-
-class Header : public Composite<GUID, SlaveAddress,
+class Header : public Composite<CommonShared,
     SensorCount, RequiredTemp, TempAvg, Status, Control> {};
 class Node : public Composite<ROM, Temp, SensorStatus> {};
 class Nodes : public CompositeList<Node, MAX_SENSORS> {};
