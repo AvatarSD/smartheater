@@ -34,7 +34,7 @@ int16_t EEMEM requiredTemp = REQUIRED_TEMP * 16;
 uint8_t deviceCount = 0;
 int16_t tempAvg = 0;
 
-uint8_t EEMEM deviceStatus = 0;
+uint8_t EEMEM deviceStatus = DEV_DEFAULT_STATUS;
 
 SensorNode EEMEM sensorNodes[MAX_SENSORS];
 int16_t sensorTemps[MAX_SENSORS];
