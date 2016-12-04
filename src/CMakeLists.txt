@@ -50,5 +50,5 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
 	avr-objcopy -j .eeprom --change-section-lma .eeprom=0 -O ihex ${PROJECT_NAME} ${PROJECT_NAME}_eeprom.hex)
 
 #program to board
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-	avrdude -v -e -p t85 -c dragon_dw -Uflash:w:${PROJECT_NAME}.hex:i -Ueeprom:w:${PROJECT_NAME}_eeprom.hex)
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
+#	avrdude -v -e -p t85 -c dragon_dw -Uflash:w:${PROJECT_NAME}.hex:i -Ueeprom:w:${PROJECT_NAME}_eeprom.hex)
