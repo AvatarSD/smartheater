@@ -38,7 +38,6 @@
 #include <settings.h>
 
 
-
 SettingsExternal * settng;
 
 
@@ -51,7 +50,43 @@ public:
     }
     static ReadType read(Address addr, Num num)
     {
-        return settng->getGUID(addr);
+        return settng->getDeviceGUID(addr);
+    }
+};
+class DeviceName : public Composite<uint8_t[DEVNAME_SIZE]>
+{
+public:
+    static Error write(Address addr, uint8_t data, Num num)
+    {
+        return OK;
+    }
+    static ReadType read(Address addr, Num num = 0)
+    {
+        return settng->getDeviceName(addr);
+    }
+};
+class DeviceSWver : public Composite<uint16_t>
+{
+public:
+    static Error write(Address addr, uint8_t data, Num num)
+    {
+        return OK;
+    }
+    static ReadType read(Address addr, Num num = 0)
+    {
+        return settng->getDeviceSWver(addr);
+    }
+};
+class DeviceHWver : public Composite<uint16_t>
+{
+public:
+    static Error write(Address addr, uint8_t data, Num num)
+    {
+        return OK;
+    }
+    static ReadType read(Address addr, Num num = 0)
+    {
+        return settng->getDeviceHWver(addr);
     }
 };
 class SlaveAddress : public Composite<uint8_t>
@@ -196,7 +231,8 @@ public:
 };
 
 
-class CommonShared : public Composite<GUID, SlaveAddress> {};
+class CommonShared : public
+    Composite<GUID, DeviceName, DeviceSWver, DeviceHWver, SlaveAddress> {};
 
 class Header : public Composite<CommonShared,
     SensorCount, RequiredTemp, TempAvg, Status, Control> {};

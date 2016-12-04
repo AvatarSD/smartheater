@@ -79,9 +79,24 @@ uint8_t SettingsExternal::getDeviceModeStatus()
     return mem->getDeviceModeStatus();
 }
 
-uint8_t SettingsExternal::getGUID(uint8_t pos)
+uint8_t SettingsExternal::getDeviceGUID(uint8_t pos)
 {
-    return mem->getGUID(pos);
+    return mem->getDeviceGUID(pos);
+}
+
+uint8_t SettingsExternal::getDeviceName(uint8_t pos)
+{
+    return mem->getDeviceName(pos);
+}
+
+uint8_t SettingsExternal::getDeviceSWver(uint8_t pos)
+{
+    return mem->getDeviceSWver(pos);
+}
+
+uint8_t SettingsExternal::getDeviceHWver(uint8_t pos)
+{
+    return mem->getDeviceHWver(pos);
 }
 
 uint8_t SettingsExternal::getI2cAddress()

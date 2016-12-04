@@ -2,13 +2,6 @@
 #include <avr/eeprom.h>
 
 
-
-
-//default instance for first-time program
-#define I2C_SLAVE_ADDRESS 0x04
-#define REQUIRED_TEMP 20
-
-
 Settings * Settings::instance()
 {
     static Settings conf;
@@ -24,23 +17,27 @@ struct SensorNode {
 namespace backstagemem
 {
 
-int16_t EEMEM requiredTemp = REQUIRED_TEMP * 16;
-uint8_t EEMEM slaveAddress = I2C_SLAVE_ADDRESS;
-
 uint8_t EEMEM GUID[GUID_SIZE] = { // TODO autogen guid
     0x66, 0x11, 0x70, 0x8B,
     0xC4, 0x76, 0x41, 0x96,
     0x91, 0x12, 0xA0, 0x91,
     0x44, 0xF0, 0xBF, 0x9C
 };
+uint8_t EEMEM deviceName[DEVNAME_SIZE] = DEV_NAME;
+uint16_t EEMEM deviceHWver = DEV_HW_VER;
+const uint16_t deviceSWver = DEV_SW_VER;
+
+uint8_t EEMEM slaveAddress = I2C_SLAVE_ADDRESS;
+
+int16_t EEMEM requiredTemp = REQUIRED_TEMP * 16;
 
 uint8_t deviceCount = 0;
 int16_t tempAvg = 0;
 
+uint8_t EEMEM deviceStatus = 0;
+
 SensorNode EEMEM sensorNodes[MAX_SENSORS];
 int16_t sensorTemps[MAX_SENSORS];
-
-uint8_t EEMEM deviceStatus = 0;
 
 }
 
@@ -97,9 +94,24 @@ void Settings::scanEEpromForRomsCount()
     setDeviceCount(i);
 }
 
-uint8_t Settings::getGUID(uint8_t pos)
+uint8_t Settings::getDeviceGUID(uint8_t pos)
 {
     return eeprom_read_byte(&backstagemem::GUID[pos]);
+}
+
+uint8_t Settings::getDeviceName(uint8_t pos)
+{
+    return eeprom_read_byte(&backstagemem::deviceName[pos]);
+}
+
+uint8_t Settings::getDeviceSWver(uint8_t pos)
+{
+    return *(((uint8_t *) &backstagemem::deviceSWver) + pos);
+}
+
+uint8_t Settings::getDeviceHWver(uint8_t pos)
+{
+    return eeprom_read_byte(((uint8_t *)&backstagemem::deviceHWver) + pos);
 }
 
 uint8_t Settings::getTempAvg(uint8_t pos)

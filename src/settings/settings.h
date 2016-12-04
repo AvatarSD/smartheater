@@ -46,12 +46,16 @@ public:
     uint8_t getDeviceCount();
     uint8_t getRequiredTemp(uint8_t pos);
     uint8_t getTempAvg(uint8_t pos);
-    uint8_t getGUID(uint8_t pos);
     uint8_t getI2cAddress();
     uint8_t getSensorRom(uint8_t num, uint8_t pos);
     uint8_t getSensorTemp(uint8_t num, uint8_t pos);
     uint8_t getSensorStatus(uint8_t num);
     uint8_t getDeviceModeStatus();
+
+    uint8_t getDeviceGUID(uint8_t pos);
+    uint8_t getDeviceName(uint8_t pos);
+    uint8_t getDeviceSWver(uint8_t pos);
+    uint8_t getDeviceHWver(uint8_t pos);
 
     void setRequiredTemp(uint8_t temp, uint8_t pos);
     void setSensorStatus(uint8_t num, uint8_t status);
