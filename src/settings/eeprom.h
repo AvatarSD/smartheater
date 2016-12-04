@@ -3,25 +3,31 @@
 
 #include <inttypes.h>
 
-// hardeare defined settings
+#define VER(MAJOR, MINOR) ((MAJOR << 8)|(MINOR))
+
+// hardWare defined settings
 #define GUID_SIZE 16
 #define DEVNAME_SIZE 4
 
-#define ROM_SIZE 8
-#define MAX_SENSORS 20
-#define RESERVED_SIZE 4
-#define MAX_SENSORS 20
+#define DEV_NAME {'a', 'h', 't', 'r'}
+#define DEV_SW_VER VER(1, 5)
+#define DEV_HW_VER VER(0, 1)
 
 // here is a default one
 #define MULTICAST_ADDR 0x50
 
 //default instance for first-time program
 #define I2C_SLAVE_ADDRESS 0x13
-#define REQUIRED_TEMP 20
 
-#define DEV_NAME {'a', 'p', 'l', 'v'}
-#define DEV_SW_VER 150
-#define DEV_HW_VER 001
+//device specific macro
+#define ROM_SIZE 8
+#define MAX_SENSORS 20
+#define RESERVED_SIZE 4
+#define MAX_SENSORS 20
+
+//default instance for first-time program
+#define REQUIRED_TEMP 20
+#define DEV_DEFAULT_STATUS HeaterMode::Auto
 
 
 enum SensorStatusEnum {
