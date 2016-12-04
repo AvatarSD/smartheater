@@ -1,18 +1,15 @@
 
 #include <hwiface.h>
 #include <memory.h>
-#include <server.h>
 #include <settings.h>
 #include <core.h>
 #include <usiTwiSlave.h>
 #include <usi.h>
 #include <DallasTemperature.h>
-#include <corestateserver.h>
 #include <indication.h>
-#include <mainmem.h>
 
 
-// num of data line pin
+// num of data line pin, hardware-defined
 #define ONEWIREPIN 3
 
 int main()
@@ -24,18 +21,18 @@ int main()
     OneWire wire(ONEWIREPIN);
     auto eeprommem = Settings::instance();
 
-    Indication leds(*hardware);
-
-
     SettingsExternal settingsExt(*eeprommem);
     MemoryMap memory(settingsExt);
 
+    SettingsInternal settingsInt(*eeprommem);
+
     UsiTwiSlave network(usi);
-    I2CSlaveServer server(&memory, &network, I2C_SLAVE_ADDRESS, MULTICAST_ADDRESS);
+    I2CSlaveServer server(&network, &memory);
+    network.init(settingsInt.getI2cAddress(), MULTICAST_ADDR);
 
     DallasTemperature sensors(&wire);
 
-    SettingsInternal settingsInt(*eeprommem);
+    Indication leds(*hardware);
     CoreLogic logic(server, sensors, settingsInt, *hardware, leds);
     settingsExt.setICoreState(&logic);
 

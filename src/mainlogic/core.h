@@ -1,7 +1,7 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include <corestateserver.h>
+#include <settings.h>
 
 
 class I2CSlaveServer;

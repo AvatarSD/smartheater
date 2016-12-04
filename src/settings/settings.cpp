@@ -1,6 +1,4 @@
 #include "settings.h"
-#include <corestateserver.h>
-
 
 
 HeaterMode SettingsInternal::getDeviceModeStatus()
@@ -81,9 +79,24 @@ uint8_t SettingsExternal::getDeviceModeStatus()
     return mem->getDeviceModeStatus();
 }
 
-uint8_t SettingsExternal::getGUID(uint8_t pos)
+uint8_t SettingsExternal::getDeviceGUID(uint8_t pos)
 {
-    return mem->getGUID(pos);
+    return mem->getDeviceGUID(pos);
+}
+
+uint8_t SettingsExternal::getDeviceName(uint8_t pos)
+{
+    return mem->getDeviceName(pos);
+}
+
+uint8_t SettingsExternal::getDeviceSWver(uint8_t pos)
+{
+    return mem->getDeviceSWver(pos);
+}
+
+uint8_t SettingsExternal::getDeviceHWver(uint8_t pos)
+{
+    return mem->getDeviceHWver(pos);
 }
 
 uint8_t SettingsExternal::getI2cAddress()
@@ -136,6 +149,6 @@ void SettingsExternal::setI2cAddress(uint8_t addr)
 void SettingsExternal::setDeviceMode(uint8_t status)
 {
     state->setDeviceMode(status);
-    if(status > 0b11)
+    if(status < 0b100)
         mem->setDeviceMode(status);
 }

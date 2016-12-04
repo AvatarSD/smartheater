@@ -101,7 +101,7 @@ void CoreLogic::mainCycle()
 
 void CoreLogic::setI2cAddress(uint8_t addr)
 {
-    server->setAddress(addr);
+    server->getNetworkObject()->setAddress(addr);
 }
 
 void CoreLogic::setDeviceMode(uint8_t status)
