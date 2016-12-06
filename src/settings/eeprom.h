@@ -27,7 +27,7 @@
 
 //default instance for first-time program
 #define REQUIRED_TEMP 20
-#define DEV_DEFAULT_STATUS HeaterMode::Auto
+#define DEFAULT_HEATER_MODE HeaterMode::Auto
 
 
 enum SensorStatusEnum {

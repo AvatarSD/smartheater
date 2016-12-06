@@ -34,7 +34,7 @@ int16_t EEMEM requiredTemp = REQUIRED_TEMP * 16;
 uint8_t deviceCount = 0;
 int16_t tempAvg = 0;
 
-uint8_t EEMEM deviceStatus = DEV_DEFAULT_STATUS;
+uint8_t EEMEM heaterMode = DEFAULT_HEATER_MODE;
 
 SensorNode EEMEM sensorNodes[MAX_SENSORS];
 int16_t sensorTemps[MAX_SENSORS];
@@ -158,12 +158,12 @@ void Settings::setSensorStatus(uint8_t num, uint8_t status)
 
 void Settings::setDeviceMode(uint8_t status)
 {
-    eeprom_write_byte((uint8_t *)&backstagemem::deviceStatus, status);
+    eeprom_write_byte((uint8_t *)&backstagemem::heaterMode, status);
 }
 
 uint8_t Settings::getDeviceModeStatus()
 {
-    return eeprom_read_byte((uint8_t *)&backstagemem::deviceStatus);
+    return eeprom_read_byte((uint8_t *)&backstagemem::heaterMode);
 }
 
 void Settings::setI2cAddress(uint8_t addr)
