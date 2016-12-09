@@ -3,7 +3,7 @@
 	url = git@github.com:AvatarSD/Arduino-Temperature-Control-Library.git
 [submodule "src/temp/OneWire"]
 	path = src/temp/OneWire
-	url = git@github.com:AvatarSD/OneWire.git
+	url = https://github.com/PaulStoffregen/OneWire
 [submodule "src/settings/polymorphmemory"]
 	path = src/settings/polymorphmemory
 	url = git@github.com:AvatarSD/polymorphmemory.git
