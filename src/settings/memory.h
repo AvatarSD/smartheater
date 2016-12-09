@@ -7,7 +7,7 @@
 
 class SettingsExternal;
 
-class MemoryMap : public iMappedMemory
+class MemoryMap : public IMappedMemory
 {
 public:
     MemoryMap(SettingsExternal & settings);
