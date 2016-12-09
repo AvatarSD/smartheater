@@ -30,7 +30,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/settings
 	${CMAKE_CURRENT_SOURCE_DIR}/net/I2C
 	${CMAKE_CURRENT_SOURCE_DIR}/net/server
-	${CMAKE_CURRENT_SOURCE_DIR}/settings/polymorphmemory
+	${CMAKE_CURRENT_SOURCE_DIR}/net/polymorphmemory
 	${CMAKE_CURRENT_SOURCE_DIR}/mainlogic
 )
 

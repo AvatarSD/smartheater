@@ -4,9 +4,6 @@
 [submodule "src/temp/OneWire"]
 	path = src/temp/OneWire
 	url = https://github.com/PaulStoffregen/OneWire
-[submodule "src/settings/polymorphmemory"]
-	path = src/settings/polymorphmemory
-	url = git@github.com:AvatarSD/polymorphmemory.git
 [submodule "src/net"]
 	path = src/net
 	url = git@github.com:AvatarSD/usi-i2c-slave-withserver.git
