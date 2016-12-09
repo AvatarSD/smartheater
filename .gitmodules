@@ -1,6 +1,6 @@
 [submodule "src/temp/DallasTemp"]
 	path = src/temp/DallasTemp
-	url = https://github.com/milesburton/Arduino-Temperature-Control-Library.git
+	url = git@github.com:AvatarSD/Arduino-Temperature-Control-Library.git
 [submodule "src/temp/OneWire"]
 	path = src/temp/OneWire
 	url = https://github.com/PaulStoffregen/OneWire
