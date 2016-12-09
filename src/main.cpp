@@ -26,9 +26,9 @@ int main()
 
     SettingsInternal settingsInt(*eeprommem);
 
-    UsiTwiSlave network(usi);
+    UsiTwiSlave network(usi, MULTICAST_ADDR);
     I2CSlaveServer server(&network, &memory);
-    network.init(settingsInt.getI2cAddress(), MULTICAST_ADDR);
+    network.init(settingsInt.getI2cAddress());
 
     DallasTemperature sensors(&wire);
 
