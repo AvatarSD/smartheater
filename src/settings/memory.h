@@ -1,16 +1,16 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef MAPPEDMEMORY_H
+#define MAPPEDMEMORY_H
 
-#include <inttypes.h>
 #include <server.h>
+#include <settings.h>
 
 
-class SettingsExternal;
-
-class MemoryMap : public IMappedMemory
+class MappedMemory : public IMappedMemory
 {
 public:
-    MemoryMap(SettingsExternal & settings);
+    MappedMemory(ISettingsExt * settings,
+                 IAutoHeaterControl * control,
+                 ITwiSlave * network);
 
     int8_t write(uint8_t addr, uint8_t data);
     int16_t read(uint8_t addr);
@@ -19,5 +19,4 @@ public:
 };
 
 
-
-#endif
+#endif // MAPPEDMEMORY_H

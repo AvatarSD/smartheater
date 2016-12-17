@@ -34,11 +34,25 @@
 
 
 #include "memory.h"
-#include <polymorphmemory.h>
 #include <settings.h>
+#include <slaveaddres.h>
 
 
-SettingsExternal * settng;
+ISettingsExt * settings;
+IAutoHeaterControl * control;
+ITwiSlave * network;
+
+
+#define readByte(word, addr) ((uint8_t)((word >> (addr * 8)) & 0xFF));
+
+template<typename TypeSize>
+int8_t writeWord(TypeSize & staticReg, uint8_t addr, uint8_t data)
+{
+    if(addr == 0) staticReg = 0;
+    staticReg |= (TypeSize)(data << (addr * 8));
+    if(addr == sizeof(staticReg) - 1) return OK;
+    return ERR;
+}
 
 
 class GUID : public Composite<uint8_t[GUID_SIZE]>
@@ -50,7 +64,7 @@ public:
     }
     static ReadType read(Address addr, Num num)
     {
-        return settng->getDeviceGUID(addr);
+        return settings->getDeviceGUID(addr);
     }
 };
 class DeviceName : public Composite<uint8_t[DEVNAME_SIZE]>
@@ -62,7 +76,7 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getDeviceName(addr);
+        return settings->getDeviceName(addr);
     }
 };
 class DeviceSWver : public Composite<uint16_t>
@@ -74,7 +88,7 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getDeviceSWver(addr);
+        return settings->getDeviceSWver(addr);
     }
 };
 class DeviceHWver : public Composite<uint16_t>
@@ -86,47 +100,25 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getDeviceHWver(addr);
+        return settings->getDeviceHWver(addr);
     }
 };
-class SlaveAddress : public Composite<uint8_t>
-{
-public:
-    static uint8_t newAddr;
-    static bool flag;
-
-    static Error write(Address addr, uint8_t data, Num num)
-    {
-        if(data == MULTICAST_ADDR) {
-            settng->setI2cAddress(data);
-            return OK;
-        }
-        newAddr = data;
-        flag = true;
-        return OK;
-    }
-    static ReadType read(Address addr, Num num = 0)
-    {
-        if(flag)
-            settng->setI2cAddress(newAddr);
-        flag = false;
-        return settng->getI2cAddress();
-    }
-};
-uint8_t SlaveAddress::newAddr = 0;
-bool SlaveAddress::flag = false;
 
 class RequiredTemp : public Composite<int16_t>
 {
 public:
     static Error write(Address addr, uint8_t data, Num num)
     {
-        settng->setRequiredTemp(data, addr);
+        static RawTemp tmp;
+        if(writeWord(tmp, addr, data) == OK)
+            settings->setRequiredTempRaw(tmp);
         return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getRequiredTemp(addr);
+        static RawTemp tmp;
+        if(addr == 0) tmp = settings->getRequiredTempRaw();
+        return readByte(tmp, addr);
     }
 };
 class SensorCount : public Composite<uint8_t>
@@ -138,7 +130,7 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getDeviceCount();
+        return control->getFoundedSensorsCount();
     }
 };
 class TempAvg : public Composite<uint16_t>
@@ -150,7 +142,9 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getTempAvg(addr);
+        static RawTemp tmp;
+        if(addr == 0) tmp = control->getTempAvg();
+        return readByte(tmp, addr);
     }
 };
 class Status : public Composite<uint8_t>
@@ -162,7 +156,21 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getDeviceModeStatus();
+        return (uint8_t)control->getDeviceStatus();
+    }
+};
+class Mode : public Composite<uint8_t>
+{
+public:
+    static Error write(Address addr, uint8_t data, Num num)
+    {
+        settings->setDeviceMode((DeviceMode)data);
+        control->setDeviceMode((DeviceMode)data);
+        return OK;
+    }
+    static ReadType read(Address addr, Num num = 0)
+    {
+        return (uint8_t)settings->getDeviceMode();
     }
 };
 class Control : public Composite<uint8_t>
@@ -170,16 +178,15 @@ class Control : public Composite<uint8_t>
 public:
     static Error write(Address addr, uint8_t data, Num num)
     {
-        settng->setDeviceMode(data);
+        control->executeCommand((DeviceCommand)data);
         return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return 'C';
+        return 'x';
     }
 };
-
-class ROM : public Composite<uint8_t[ROM_SIZE]>
+class SensROM : public Composite<uint8_t[ROM_SIZE]>
 {
 public:
     static Error write(Address addr, uint8_t data, Num num)
@@ -188,10 +195,10 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getSensorRom(num, addr);
+        return settings->getSensorRom(num, addr);
     }
 };
-class Temp : public Composite<uint16_t>
+class SensTemp : public Composite<uint16_t>
 {
 public:
     static Error write(Address addr, uint8_t data, Num num)
@@ -200,20 +207,24 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getSensorTemp(num, addr);
+        static RawTemp tmp;
+        if(addr == 0) tmp = control->getSensorTemp(num);
+        return readByte(tmp, addr);
     }
 };
-class SensorStatus : public Composite<uint8_t>
+class SensStatus : public Composite<uint8_t>
 {
 public:
     static Error write(Address addr, uint8_t data, Num num)
     {
-        settng->setSensorStatus(num, data);
+        settings->setSensorMode(num, (SensorMode)data);
         return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return settng->getSensorStatus(num);
+        uint8_t mode = settings->getSensorMode(num);
+        uint8_t status = control->getSensorStatus(num);
+        return ((uint8_t)(status << 4) & (mode));
     }
 };
 
@@ -230,44 +241,39 @@ public:
     }
 };
 
-
 class CommonShared : public
-    Composite<GUID, DeviceName, DeviceSWver, DeviceHWver, SlaveAddress> {};
+    Composite<GUID, DeviceName, DeviceSWver, DeviceHWver, SlaveAddress<1>> {};
 
-class Header : public Composite<CommonShared,
-    SensorCount, RequiredTemp, TempAvg, Status, Control> {};
-class Node : public Composite<ROM, Temp, SensorStatus> {};
+class Header : public
+    Composite<SensorCount, RequiredTemp, TempAvg, Status, Mode, Control> {};
+class Node : public Composite<SensROM, SensTemp, SensStatus> {};
 class Nodes : public CompositeList<Node, MAX_SENSORS> {};
 
-class MainMem : public Composite<Header, _res_, Nodes> {};
-
-
+class MainMem : public
+    Composite <CommonShared, Header, _res_, Nodes> {};
 
 static_assert(sizeof(MainMem) == 256, "MainMen is not 256bytes in size");
 
 
-
-
-
 typedef MainMem MemoryMammer ;
-
-
-MemoryMap::MemoryMap(SettingsExternal & settings)
+MappedMemory::MappedMemory(ISettingsExt * settngs,
+                           IAutoHeaterControl * ctrl,
+                           ITwiSlave * net)
 {
-    settng = &settings;
+    settings = settngs;
+    control = ctrl;
+    network = net;
+    SlaveAddress<1>::setAddreses(network, settings);
 }
-
-int8_t MemoryMap::write(uint8_t addr, uint8_t data)
+int8_t MappedMemory::write(uint8_t addr, uint8_t data)
 {
     return MemoryMammer::write(addr, data);
 }
-
-int16_t MemoryMap::read(uint8_t addr)
+int16_t MappedMemory::read(uint8_t addr)
 {
     return MemoryMammer::read(addr);
 }
-
-uint16_t MemoryMap::mapsize()
+uint16_t MappedMemory::mapsize()
 {
     return sizeof(MemoryMammer);
 }

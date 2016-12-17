@@ -32,6 +32,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/net/server
 	${CMAKE_CURRENT_SOURCE_DIR}/net/polymorphmemory
 	${CMAKE_CURRENT_SOURCE_DIR}/mainlogic
+	${CMAKE_CURRENT_SOURCE_DIR}/net/slaveAddressCell
 )
 
 

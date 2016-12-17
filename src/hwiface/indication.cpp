@@ -3,9 +3,9 @@
 #include <util/delay.h>
 #include <hwiface.h>
 
-Indication::Indication(HWiface & hardware) : hardware(&hardware)
+Indication::Indication(HWiface * hardware) :
+    hardware(hardware)
 {
-
 }
 
 void Indication::indicateAll(uint16_t deviceCount, const float & temperature)

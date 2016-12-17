@@ -1,45 +1,36 @@
 
-#include <hwiface.h>
+//#include <hwiface.h>
 #include <memory.h>
-#include <settings.h>
+#include <eeprom.h>
 #include <core.h>
 #include <usiTwiSlave.h>
-#include <usi.h>
-#include <DallasTemperature.h>
-#include <indication.h>
+//#include <DallasTemperature.h>
+//#include <indication.h>
 
 
 // num of data line pin, hardware-defined
 #define ONEWIREPIN 3
+#define MULTICAST_ADDR 0x50
 
 int main()
 {
-    auto hardware = HWiface::getInstance();
-    hardware->init();
-    auto usi = USI::instance();
+    auto hardware = HWiface::instance();
+    auto settings = Settings::instance();
 
     OneWire wire(ONEWIREPIN);
-    auto eeprommem = Settings::instance();
-
-    SettingsExternal settingsExt(*eeprommem);
-    MemoryMap memory(settingsExt);
-
-    SettingsInternal settingsInt(*eeprommem);
-
-    UsiTwiSlave network(usi, MULTICAST_ADDR);
-    I2CSlaveServer server(&network, &memory);
-    network.init(settingsInt.getI2cAddress());
-
     DallasTemperature sensors(&wire);
+    Indication leds(hardware);
+    BasicAutoHeaterController logic(&sensors, settings, hardware, &leds);
+    UsiTwiSlave network(USI::instance(), MULTICAST_ADDR);
+    MappedMemory memory(settings, &logic, &network);
+    I2CSlaveServer server(&network, &memory);
 
-    Indication leds(*hardware);
-    CoreLogic logic(server, sensors, settingsInt, *hardware, leds);
-    settingsExt.setICoreState(&logic);
-
+    hardware->init();
+    network.init(settings->getAddress());
     sei();
 
     while(1)
-        logic.mainCycle();
+        logic.doHandle();
 
     return 0;
 }
