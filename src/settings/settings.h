@@ -76,15 +76,6 @@ public:
 
 };
 
-class ISettingsGeneral
-{
-public:
-    virtual uint8_t getDeviceGUID(uint8_t pos) const;
-    virtual uint8_t getDeviceName(uint8_t pos) const;
-    virtual uint8_t getDeviceSWver(uint8_t pos) const;
-    virtual uint8_t getDeviceHWver(uint8_t pos) const;
-};
-
 class ISettingsInt
 {
 public:
@@ -98,9 +89,14 @@ public:
     virtual DeviceMode getDeviceMode() const;
 };
 
-class ISettingsExt : public ISettingsGeneral, public ISlaveAddress
+class ISettingsExt : public ISlaveAddress
 {
 public:
+    virtual uint8_t getDeviceGUID(uint8_t pos) const;
+    virtual uint8_t getDeviceName(uint8_t pos) const;
+    virtual uint8_t getDeviceSWver(uint8_t pos) const;
+    virtual uint8_t getDeviceHWver(uint8_t pos) const;
+
     virtual void setAddress(I2CAddress addr);
     virtual void setDeviceMode(DeviceMode status);
     virtual void setRequiredTempRaw(RawTemp temp);

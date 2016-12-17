@@ -22,7 +22,7 @@ const uint8_t deviceName[DEVNAME_SIZE] = DEV_NAME;
 
 //device
 I2CAddress EEMEM slaveAddress = I2C_SLAVE_ADDRESS;
-RawTemp EEMEM requiredTemp = REQUIRED_TEMP * 16;
+RawTemp EEMEM requiredTemp = tempToRaw(REQUIRED_TEMP);
 DeviceMode EEMEM deviceMode = DEFAULT_DEVICE_MODE;
 SensorsNodes EEMEM sensorNodes[MAX_SENSORS];
 }

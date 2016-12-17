@@ -1,11 +1,12 @@
+/*
+ *  AvatarSD
+ *  avatarsd.com
+ */
 
-//#include <hwiface.h>
 #include <memory.h>
 #include <eeprom.h>
 #include <core.h>
 #include <usiTwiSlave.h>
-//#include <DallasTemperature.h>
-//#include <indication.h>
 
 
 // num of data line pin, hardware-defined

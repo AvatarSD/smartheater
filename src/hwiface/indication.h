@@ -15,6 +15,7 @@ public:
 
 private:
     HWiface * hardware;
+    static void delayMs(uint16_t ms);
 
 };
 
