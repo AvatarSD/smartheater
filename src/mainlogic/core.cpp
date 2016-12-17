@@ -7,20 +7,9 @@ AutoHeaterControl::AutoHeaterControl(ISettingsInt * settings,
     hardware(hardware)
 {
     this->tempAvg = 0;
-    this->mode = settings->getDeviceMode();
-    this->sensorsCount = settings->getSensorsCount();
+    this->mode = this->settings->getDeviceMode();
+    this->sensorsCount = this->settings->getSensorsCount();
 }
-
-void AutoHeaterControl::setDeviceMode(DeviceMode mode)
-{
-    this->mode = mode;
-    if(mode == EnableHeater)
-        hardware->turnHeaterOn();
-    else if(mode == DisableHeater)
-        hardware->turnHeaterOff();
-
-}
-
 void AutoHeaterControl::executeCommand(DeviceCommand cmd)
 {
     if(cmd == Search) {
@@ -31,31 +20,47 @@ void AutoHeaterControl::executeCommand(DeviceCommand cmd)
         return;
     }
 }
-
+void AutoHeaterControl::setDeviceMode(DeviceMode mode)
+{
+    this->mode = mode;
+    settings->setDeviceMode(mode);
+    if(mode == EnableHeater)
+        hardware->turnHeaterOn();
+    else if(mode == DisableHeater)
+        hardware->turnHeaterOff();
+}
+DeviceMode AutoHeaterControl::getDeviceMode() const
+{
+    return settings->getDeviceMode();
+}
+SensorNum AutoHeaterControl::getSensorsCount() const
+{
+    return sensorsCount;
+}
 DeviceStatus AutoHeaterControl::getDeviceStatus() const
 {
     return deviceStatus;
 }
-
 Temp AutoHeaterControl::getTempAvg() const
 {
     return tempAvg;
 }
-
 Temp AutoHeaterControl::getSensorTemp(SensorNum num) const
 {
     return sensorsTemp[num];
 }
-
-SensorStatus AutoHeaterControl::getSensorStatus(uint8_t num) const
+SensorStatus AutoHeaterControl::getSensorStatus(SensorNum num) const
 {
     return sensorsStatus[num];
 }
 
-SensorNum AutoHeaterControl::getFoundedSensorsCount() const
+// virtual
+SensorNum AutoHeaterControl::searchSensors()
 {
-    return sensorsCount;
+    return 0;
 }
+void AutoHeaterControl::eraceeeprom() {}
+void AutoHeaterControl::doHandle() {}
 
 
 BasicAutoHeaterController::BasicAutoHeaterController(
@@ -70,7 +75,6 @@ BasicAutoHeaterController::BasicAutoHeaterController(
 {
 
 }
-
 void BasicAutoHeaterController::eraceeeprom()
 {
     DeviceAddress nullRom = {
@@ -84,7 +88,6 @@ void BasicAutoHeaterController::eraceeeprom()
     }
     sensorsCount = 0;
 }
-
 void BasicAutoHeaterController::heaterHandler(const Temp & tempAvg,
                                               SensorNum sensorsReaded)
 {
@@ -105,7 +108,7 @@ void BasicAutoHeaterController::heaterHandler(const Temp & tempAvg,
         }
     }
 }
-void BasicAutoHeaterController::searchSensors()
+SensorNum BasicAutoHeaterController::searchSensors()
 {
     hardware->turnOneWireLineOn();
     sensors->begin();
@@ -116,17 +119,17 @@ void BasicAutoHeaterController::searchSensors()
     while(sensors->getOneWire()->search(deviceAddress)) {
         if((sensors->validAddress(deviceAddress)) &&
                 (deviceCounter < MAX_SENSORS)) {
+            settings->setSensorMode(deviceCounter, SensorMode::Enable);
             settings->setSensorRom(deviceCounter, deviceAddress);
-            sensorsStatus[deviceCounter] = SensorStatus::Active;
-            deviceCounter++;
+            sensorsStatus[deviceCounter++] = SensorStatus::Active;
         }
     }
     sensorsCount = deviceCounter;
+    return sensorsCount;
 }
-
 void BasicAutoHeaterController::doHandle()
 {
-    SensorNum deviceReaded = 0, deviceCount = settings->getSensorsCount();
+    SensorNum deviceReaded = 0;
     Temp tempAvg = 0;
     DeviceAddress deviceAddress;
 
@@ -134,7 +137,7 @@ void BasicAutoHeaterController::doHandle()
     sensors->begin();
     sensors->requestTemperatures();
 
-    for(SensorNum i = 0; i < deviceCount; i++) {
+    for(SensorNum i = 0; i < sensorsCount; i++) {
         //checking - if available
         if(settings->getSensorMode(i) == SensorMode::Err) {
             sensorsStatus[i] = SensorStatus::NoAvailable;

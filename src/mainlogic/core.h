@@ -13,31 +13,31 @@ public:
     AutoHeaterControl(ISettingsInt * settings,
                       HWiface * hardware);
 
-    virtual void doHandle() {}
+    virtual void doHandle();
 
     void executeCommand(DeviceCommand cmd) override;
     void setDeviceMode(DeviceMode mode) override;
+    DeviceMode getDeviceMode() const override;
     DeviceStatus getDeviceStatus() const override;
     Temp getTempAvg() const override;
-    SensorNum getFoundedSensorsCount() const override;
+    SensorNum getSensorsCount() const override;
     Temp getSensorTemp(SensorNum num) const override;
     SensorStatus getSensorStatus(SensorNum num) const override;
 
 protected:
-    virtual void searchSensors() {}
-    virtual void eraceeeprom() {}
+    virtual SensorNum searchSensors();
+    virtual void eraceeeprom();
 
     ISettingsInt * settings;
     HWiface * hardware;
 
+    Temp tempAvg;
     DeviceMode mode;
+    SensorNum sensorsCount;
     DeviceStatus deviceStatus;
 
-    SensorNum sensorsCount;
-    Temp tempAvg;
     Temp sensorsTemp[MAX_SENSORS];
     SensorStatus sensorsStatus[MAX_SENSORS];
-
 };
 
 class BasicAutoHeaterController : public AutoHeaterControl
@@ -49,7 +49,7 @@ public:
     void doHandle() override;
 
 protected:
-    void searchSensors() override;
+    SensorNum searchSensors() override;
     void eraceeeprom() override;
 
     void heaterHandler(const Temp & tempAvg, SensorNum sensorsReaded);

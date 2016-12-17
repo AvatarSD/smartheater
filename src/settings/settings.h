@@ -63,33 +63,26 @@ typedef uint16_t RawTemp;
 typedef uint8_t SensorNum;
 
 
-class IAutoHeaterControl
+class IDeviceModeSettings
 {
 public:
-    virtual void executeCommand(DeviceCommand cmd);
     virtual void setDeviceMode(DeviceMode mode);
-    virtual DeviceStatus getDeviceStatus() const;
-    virtual Temp getTempAvg() const;
-    virtual SensorNum getFoundedSensorsCount() const;
-    virtual Temp getSensorTemp(SensorNum num) const;
-    virtual SensorStatus getSensorStatus(SensorNum num) const;
-
-};
-
-class ISettingsInt
-{
-public:
-    virtual void setSensorMode(SensorNum sensor, SensorMode mode);
-    virtual void setSensorRom(SensorNum num, const uint8_t * rom);
-    virtual void getSensorRom(SensorNum num, uint8_t * rom) const;
-    virtual SensorNum getSensorsCount() const;
-    virtual SensorMode getSensorMode(SensorNum num) const;
-    virtual I2CAddress getAddress() const;
-    virtual Temp getRequiredTemp() const;
     virtual DeviceMode getDeviceMode() const;
 };
 
-class ISettingsExt : public ISlaveAddress
+class IAutoHeaterControl : public IDeviceModeSettings
+{
+public:
+    virtual void executeCommand(DeviceCommand cmd);
+
+    virtual DeviceStatus getDeviceStatus() const;
+    virtual Temp getTempAvg() const;
+    virtual SensorNum getSensorsCount() const;
+    virtual Temp getSensorTemp(SensorNum num) const;
+    virtual SensorStatus getSensorStatus(SensorNum num) const;
+};
+
+class ISettingsExt
 {
 public:
     virtual uint8_t getDeviceGUID(uint8_t pos) const;
@@ -97,17 +90,60 @@ public:
     virtual uint8_t getDeviceSWver(uint8_t pos) const;
     virtual uint8_t getDeviceHWver(uint8_t pos) const;
 
-    virtual void setAddress(I2CAddress addr);
-    virtual void setDeviceMode(DeviceMode status);
     virtual void setRequiredTempRaw(RawTemp temp);
     virtual void setSensorMode(SensorNum sensor, SensorMode mode);
-    virtual I2CAddress getAddress() const;
-    virtual DeviceMode getDeviceMode() const;
     virtual RawTemp getRequiredTempRaw() const;
-    virtual SensorNum getSensorsCount() const;
     virtual uint8_t getSensorRom(SensorNum sensor, uint8_t pos) const;
     virtual SensorMode getSensorMode(SensorNum sensor) const;
 };
 
+class ISettingsInt : public ISlaveAddress, public IDeviceModeSettings
+{
+public:
+    virtual void setSensorMode(SensorNum sensor, SensorMode mode);
+    virtual void setSensorRom(SensorNum num, const uint8_t * rom);
+    virtual DeviceMode getDeviceMode() const;
+    virtual Temp getRequiredTemp() const;
+    virtual SensorNum getSensorsCount() const;
+    virtual void getSensorRom(SensorNum num, uint8_t * rom) const;
+    virtual SensorMode getSensorMode(SensorNum num) const;
+};
+
+class Settings : public ISettingsInt, public ISettingsExt
+{
+public:
+    //ISettingsGeneral
+    uint8_t getDeviceGUID(uint8_t pos) const;
+    uint8_t getDeviceName(uint8_t pos) const;
+    uint8_t getDeviceSWver(uint8_t pos) const;
+    uint8_t getDeviceHWver(uint8_t pos) const;
+
+    //ISettingsInt
+    void setSensorRom(SensorNum num, const uint8_t * rom);
+    void getSensorRom(SensorNum num, uint8_t * rom) const;
+    Temp getRequiredTemp() const;
+
+    //ISettingsExt
+    void setAddress(I2CAddress addr);
+    void setDeviceMode(DeviceMode mode);
+    void setRequiredTempRaw(RawTemp temp);
+    void setSensorMode(SensorNum num, SensorMode mode);
+    RawTemp getRequiredTempRaw() const;
+    uint8_t getSensorRom(SensorNum sensor, uint8_t pos) const;
+
+    //common
+    I2CAddress getAddress() const;
+    DeviceMode getDeviceMode() const;
+    SensorNum getSensorsCount() const;
+    SensorMode getSensorMode(SensorNum sensor) const;
+
+    //instance
+    static Settings * instance();
+
+private:
+    Settings() {}
+    Settings(const Settings &) = default;
+    const Settings & operator = (const Settings &) = delete;
+};
 
 #endif // SETTINGS_H

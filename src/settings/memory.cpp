@@ -130,7 +130,7 @@ public:
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return control->getFoundedSensorsCount();
+        return control->getSensorsCount();
     }
 };
 class TempAvg : public Composite<uint16_t>
@@ -164,13 +164,12 @@ class Mode : public Composite<uint8_t>
 public:
     static Error write(Address addr, uint8_t data, Num num)
     {
-        settings->setDeviceMode((DeviceMode)data);
         control->setDeviceMode((DeviceMode)data);
         return OK;
     }
     static ReadType read(Address addr, Num num = 0)
     {
-        return (uint8_t)settings->getDeviceMode();
+        return (uint8_t)control->getDeviceMode();
     }
 };
 class Control : public Composite<uint8_t>
@@ -240,15 +239,12 @@ public:
         return 0x00;
     }
 };
-
 class CommonShared : public
-    Composite<GUID, DeviceName, DeviceSWver, DeviceHWver, SlaveAddress<1>> {};
-
+    Composite<GUID, DeviceName, DeviceSWver, DeviceHWver, SlaveAddress> {};
 class Header : public
     Composite<SensorCount, RequiredTemp, TempAvg, Status, Mode, Control> {};
 class Node : public Composite<SensROM, SensTemp, SensStatus> {};
 class Nodes : public CompositeList<Node, MAX_SENSORS> {};
-
 class MainMem : public
     Composite <CommonShared, Header, _res_, Nodes> {};
 
@@ -263,7 +259,7 @@ MappedMemory::MappedMemory(ISettingsExt * settngs,
     settings = settngs;
     control = ctrl;
     network = net;
-    SlaveAddress<1>::setAddreses(network, settings);
+    SlaveAddress::setISlaveAddress(network);
 }
 int8_t MappedMemory::write(uint8_t addr, uint8_t data)
 {
