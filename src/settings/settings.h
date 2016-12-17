@@ -2,69 +2,148 @@
 #define SETTINGS_H
 
 #include <inttypes.h>
-#include "eeprom.h"
+#include <usiTwiSlave.h>
+
+// helper
+#define VER(MAJOR, MINOR) ((MAJOR << 8)|(MINOR))
+#define tempToRaw(x) ((RawTemp)(x*16))
+#define tempFromRaw(x) (((Temp)x)/16)
+
+// hardWare defined settings
+#define GUID_SIZE 16
+#define ROM_SIZE 8
+#define DEVNAME_SIZE 4
+#define RESERVED_SIZE 3
+
+#define DEV_NAME {'a', 'h', 't', 'r'}
+#define DEV_SW_VER VER(1, 5)
+#define DEV_HW_VER VER(0, 1)
+
+// device specific macro
+#define MAX_SENSORS 20
+
+// default instance for first-time program
+#define I2C_SLAVE_ADDRESS 0x13
+#define REQUIRED_TEMP 20
+#define DEFAULT_DEVICE_MODE DeviceMode::NormalAuto
 
 
-class ICoreState
-{
-public:
-    virtual void setI2cAddress(uint8_t addr) {}
-    virtual void setDeviceMode(uint8_t status) {}
+enum SensorStatus {
+    NoAvailable = 0x00,
+    Active = 0x01,
+    Off = 0x02,
+    NoResponse = 0x03,
 };
 
-class Settings;
-
-class SettingsInternal
-{
-public:
-    SettingsInternal(Settings & mem) : mem(&mem) {}
-
-    void setDeviceCount(uint8_t count);
-    void setTempAvg(const float & temp);
-    float getRequiredTemp();
-    uint8_t getI2cAddress();
-    void setSensorRom(uint8_t num, const uint8_t * rom);
-    void setSensorStatus(uint8_t num, SensorStatusEnum status);
-    void setSensorTemp(uint8_t num, const float & temp);
-    void getSensorRom(uint8_t num, uint8_t * rom);
-    SensorStatusEnum getSensorStatus(uint8_t num);
-    uint8_t getDeviceCount();
-    HeaterMode getDeviceModeStatus();
-    void scanEEpromForRomsCount();
-
-private:
-    Settings * mem;
+enum SensorMode {
+    Err = 0x00,
+    Enable = 0x01,
+    Disable = 0x02
 };
 
-class SettingsExternal
+enum DeviceStatus {
+    HeaterOff = 0x00,
+    HeaterOn = 0x01
+};
+
+enum DeviceMode {
+    DisableHeater = 0b00,
+    EnableHeater = 0b01,
+    NormalAuto = 0b10,
+    InverseAuto = 0b11
+};
+
+enum DeviceCommand {
+    Erace = 0b01,
+    Search = 0b10
+};
+
+typedef float Temp;
+typedef uint16_t RawTemp;
+typedef uint8_t SensorNum;
+
+
+class IDeviceModeSettings
 {
 public:
-    SettingsExternal(Settings & mem) : mem(&mem) {}
+    virtual void setDeviceMode(DeviceMode mode);
+    virtual DeviceMode getDeviceMode() const;
+};
 
-    void setICoreState(ICoreState * statemachine);
+class IAutoHeaterControl : public IDeviceModeSettings
+{
+public:
+    virtual void executeCommand(DeviceCommand cmd);
 
-    uint8_t getDeviceCount();
-    uint8_t getRequiredTemp(uint8_t pos);
-    uint8_t getTempAvg(uint8_t pos);
-    uint8_t getI2cAddress();
-    uint8_t getSensorRom(uint8_t num, uint8_t pos);
-    uint8_t getSensorTemp(uint8_t num, uint8_t pos);
-    uint8_t getSensorStatus(uint8_t num);
-    uint8_t getDeviceModeStatus();
+    virtual DeviceStatus getDeviceStatus() const;
+    virtual Temp getTempAvg() const;
+    virtual SensorNum getSensorsCount() const;
+    virtual Temp getSensorTemp(SensorNum num) const;
+    virtual SensorStatus getSensorStatus(SensorNum num) const;
+};
 
-    uint8_t getDeviceGUID(uint8_t pos);
-    uint8_t getDeviceName(uint8_t pos);
-    uint8_t getDeviceSWver(uint8_t pos);
-    uint8_t getDeviceHWver(uint8_t pos);
+class ISettingsExt
+{
+public:
+    virtual uint8_t getDeviceGUID(uint8_t pos) const;
+    virtual uint8_t getDeviceName(uint8_t pos) const;
+    virtual uint8_t getDeviceSWver(uint8_t pos) const;
+    virtual uint8_t getDeviceHWver(uint8_t pos) const;
 
-    void setRequiredTemp(uint8_t temp, uint8_t pos);
-    void setSensorStatus(uint8_t num, uint8_t status);
-    void setDeviceMode(uint8_t status);
-    void setI2cAddress(uint8_t addr);
+    virtual void setRequiredTempRaw(RawTemp temp);
+    virtual void setSensorMode(SensorNum sensor, SensorMode mode);
+    virtual RawTemp getRequiredTempRaw() const;
+    virtual uint8_t getSensorRom(SensorNum sensor, uint8_t pos) const;
+    virtual SensorMode getSensorMode(SensorNum sensor) const;
+};
+
+class ISettingsInt : public ISlaveAddress, public IDeviceModeSettings
+{
+public:
+    virtual void setSensorMode(SensorNum sensor, SensorMode mode);
+    virtual void setSensorRom(SensorNum num, const uint8_t * rom);
+    virtual DeviceMode getDeviceMode() const;
+    virtual Temp getRequiredTemp() const;
+    virtual SensorNum getSensorsCount() const;
+    virtual void getSensorRom(SensorNum num, uint8_t * rom) const;
+    virtual SensorMode getSensorMode(SensorNum num) const;
+};
+
+class Settings : public ISettingsInt, public ISettingsExt
+{
+public:
+    //ISettingsGeneral
+    uint8_t getDeviceGUID(uint8_t pos) const;
+    uint8_t getDeviceName(uint8_t pos) const;
+    uint8_t getDeviceSWver(uint8_t pos) const;
+    uint8_t getDeviceHWver(uint8_t pos) const;
+
+    //ISettingsInt
+    void setSensorRom(SensorNum num, const uint8_t * rom);
+    void getSensorRom(SensorNum num, uint8_t * rom) const;
+    Temp getRequiredTemp() const;
+
+    //ISettingsExt
+    void setAddress(I2CAddress addr);
+    void setDeviceMode(DeviceMode mode);
+    void setRequiredTempRaw(RawTemp temp);
+    void setSensorMode(SensorNum num, SensorMode mode);
+    RawTemp getRequiredTempRaw() const;
+    uint8_t getSensorRom(SensorNum sensor, uint8_t pos) const;
+
+    //common
+    I2CAddress getAddress() const;
+    DeviceMode getDeviceMode() const;
+    SensorNum getSensorsCount() const;
+    SensorMode getSensorMode(SensorNum sensor) const;
+
+    //instance
+    static Settings * instance();
 
 private:
-    Settings * mem;
-    ICoreState * state;
+    Settings() {}
+    Settings(const Settings &) = default;
+    const Settings & operator = (const Settings &) = delete;
 };
 
 #endif // SETTINGS_H

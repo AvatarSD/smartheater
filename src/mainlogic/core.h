@@ -2,38 +2,60 @@
 #define CORE_H
 
 #include <settings.h>
+#include <indication.h>
+#include <hwiface.h>
+#include <DallasTemperature.h>
 
 
-class I2CSlaveServer;
-class DallasTemperature;
-class SettingsInternal;
-class HWiface;
-class Indication;
-
-class CoreLogic : public ICoreState
+class AutoHeaterControl : public IAutoHeaterControl
 {
 public:
-    CoreLogic(I2CSlaveServer & server, DallasTemperature & sensors,
-              SettingsInternal & config, HWiface & hardware, Indication & leds);
+    AutoHeaterControl(ISettingsInt * settings,
+                      HWiface * hardware);
 
-    void mainCycle();
-    void searchSensors();
-    void eraceeeprom();
+    virtual void doHandle();
 
-    void setI2cAddress(uint8_t addr);
-    void setDeviceMode(uint8_t status);
+    void executeCommand(DeviceCommand cmd) override;
+    void setDeviceMode(DeviceMode mode) override;
+    DeviceMode getDeviceMode() const override;
+    DeviceStatus getDeviceStatus() const override;
+    Temp getTempAvg() const override;
+    SensorNum getSensorsCount() const override;
+    Temp getSensorTemp(SensorNum num) const override;
+    SensorStatus getSensorStatus(SensorNum num) const override;
 
-private:
-    I2CSlaveServer * server;
-    DallasTemperature * sensors;
-    SettingsInternal * config;
+protected:
+    virtual SensorNum searchSensors();
+    virtual void eraceeeprom();
+
+    ISettingsInt * settings;
     HWiface * hardware;
+
+    Temp tempAvg;
+    DeviceMode mode;
+    SensorNum sensorsCount;
+    DeviceStatus deviceStatus;
+
+    Temp sensorsTemp[MAX_SENSORS];
+    SensorStatus sensorsStatus[MAX_SENSORS];
+};
+
+class BasicAutoHeaterController : public AutoHeaterControl
+{
+public:
+    BasicAutoHeaterController(DallasTemperature * sensors, ISettingsInt * settings,
+                              HWiface * hardware, Indication * leds);
+
+    void doHandle() override;
+
+protected:
+    SensorNum searchSensors() override;
+    void eraceeeprom() override;
+
+    void heaterHandler(const Temp & tempAvg, SensorNum sensorsReaded);
+
+    DallasTemperature * sensors;
     Indication * leds;
-
-    void heaterHandler(const float & tempAvg, uint16_t deviceReaded);
-
-
-
 };
 
 #endif // CORE_H

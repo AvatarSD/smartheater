@@ -42,7 +42,7 @@ public:
     void turnLedOn();
     void init();
 
-    static HWiface * getInstance()
+    static HWiface * instance()
     {
         static HWiface hw;
         return &hw;

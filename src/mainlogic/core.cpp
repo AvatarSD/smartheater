@@ -1,122 +1,175 @@
 #include "core.h"
-#include <settings.h>
-#include <indication.h>
-#include <hwiface.h>
-#include <DallasTemperature.h>
-#include <server.h>
 
 
-
-CoreLogic::CoreLogic(I2CSlaveServer & server,
-                     DallasTemperature & sensors,
-                     SettingsInternal & config,
-                     HWiface & hardware,
-                     Indication & leds) :
-    server(&server),
-    sensors(&sensors),
-    config(&config),
-    hardware(&hardware),
-    leds(&leds)
+AutoHeaterControl::AutoHeaterControl(ISettingsInt * settings,
+                                     HWiface * hardware) :
+    settings(settings),
+    hardware(hardware)
 {
-    this->config->scanEEpromForRomsCount();
+    this->tempAvg = 0;
+    this->mode = this->settings->getDeviceMode();
+    this->sensorsCount = this->settings->getSensorsCount();
 }
-
-void CoreLogic::eraceeeprom()
+void AutoHeaterControl::executeCommand(DeviceCommand cmd)
 {
-    DeviceAddress nullRom = {0, 0, 0, 0,
-                             0, 0, 0, 0
-                            };
-    for(uint8_t i = 0; i < MAX_SENSORS; i++) {
-        config->setSensorRom(i, nullRom);
-        config->setSensorStatus(i, SensorStatusEnum::NoAvailable);
-        config->setSensorTemp(i, 0);
+    if(cmd == Search) {
+        this->searchSensors();
+        return;
+    } else if(cmd == Erace) {
+        this->eraceeeprom();
+        return;
     }
-    config->setDeviceCount(0);
 }
-
-void CoreLogic::heaterHandler(const float & tempAvg, uint16_t deviceReaded)
+void AutoHeaterControl::setDeviceMode(DeviceMode mode)
 {
-    if((tempAvg < config->getRequiredTemp()) &&
-            (deviceReaded > 0)) hardware->turnHeaterOn();
-    else hardware->turnHeaterOff();
+    this->mode = mode;
+    settings->setDeviceMode(mode);
+    if(mode == EnableHeater)
+        hardware->turnHeaterOn();
+    else if(mode == DisableHeater)
+        hardware->turnHeaterOff();
+}
+DeviceMode AutoHeaterControl::getDeviceMode() const
+{
+    return settings->getDeviceMode();
+}
+SensorNum AutoHeaterControl::getSensorsCount() const
+{
+    return sensorsCount;
+}
+DeviceStatus AutoHeaterControl::getDeviceStatus() const
+{
+    return deviceStatus;
+}
+Temp AutoHeaterControl::getTempAvg() const
+{
+    return tempAvg;
+}
+Temp AutoHeaterControl::getSensorTemp(SensorNum num) const
+{
+    return sensorsTemp[num];
+}
+SensorStatus AutoHeaterControl::getSensorStatus(SensorNum num) const
+{
+    return sensorsStatus[num];
 }
 
-void CoreLogic::searchSensors()
+// virtual
+SensorNum AutoHeaterControl::searchSensors()
+{
+    return 0;
+}
+void AutoHeaterControl::eraceeeprom() {}
+void AutoHeaterControl::doHandle() {}
+
+
+BasicAutoHeaterController::BasicAutoHeaterController(
+    DallasTemperature * sensors,
+    ISettingsInt * config,
+    HWiface * hardware,
+    Indication * leds)
+    :
+    AutoHeaterControl(config, hardware),
+    sensors(sensors),
+    leds(leds)
+{
+
+}
+void BasicAutoHeaterController::eraceeeprom()
+{
+    DeviceAddress nullRom = {
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    };
+    for(SensorNum i = 0; i < MAX_SENSORS; i++) {
+        settings->setSensorRom(i, nullRom);
+        settings->setSensorMode(i, SensorMode::Err);
+        sensorsTemp[i] = 0;
+    }
+    sensorsCount = 0;
+}
+void BasicAutoHeaterController::heaterHandler(const Temp & tempAvg,
+                                              SensorNum sensorsReaded)
+{
+    if(sensorsReaded == 0) {
+        hardware->turnHeaterOff();
+        return;
+    }
+
+    if(sensorsReaded > 0) {
+        if(settings->getDeviceMode() == DeviceMode::NormalAuto) {
+            if(tempAvg < settings->getRequiredTemp())
+                hardware->turnHeaterOn();
+            else hardware->turnHeaterOff();
+        } else if(settings->getDeviceMode() == DeviceMode::InverseAuto) {
+            if(tempAvg < settings->getRequiredTemp())
+                hardware->turnHeaterOff();
+            else hardware->turnHeaterOn();
+        }
+    }
+}
+SensorNum BasicAutoHeaterController::searchSensors()
 {
     hardware->turnOneWireLineOn();
     sensors->begin();
     eraceeeprom();
     DeviceAddress deviceAddress;
-    uint16_t deviceCounter = 0;
+    SensorNum deviceCounter = 0;
     sensors->getOneWire()->reset_search();
     while(sensors->getOneWire()->search(deviceAddress)) {
-        if((sensors->validAddress(deviceAddress)) && (deviceCounter < MAX_SENSORS)) {
-            config->setSensorRom(deviceCounter, deviceAddress);
-            config->setSensorStatus(deviceCounter, SensorStatusEnum::Active);
-            deviceCounter++;
+        if((sensors->validAddress(deviceAddress)) &&
+                (deviceCounter < MAX_SENSORS)) {
+            settings->setSensorMode(deviceCounter, SensorMode::Enable);
+            settings->setSensorRom(deviceCounter, deviceAddress);
+            sensorsStatus[deviceCounter++] = SensorStatus::Active;
         }
     }
-    config->setDeviceCount(deviceCounter);
+    sensorsCount = deviceCounter;
+    return sensorsCount;
 }
-
-void CoreLogic::mainCycle()
+void BasicAutoHeaterController::doHandle()
 {
-    hardware->turnOneWireLineOn();
-    sensors->begin();
-
-    sensors->requestTemperatures();
-
-    uint16_t deviceReaded = 0, deviceCount = config->getDeviceCount();
-    float tempAvg = 0;
+    SensorNum deviceReaded = 0;
+    Temp tempAvg = 0;
     DeviceAddress deviceAddress;
 
-    for(uint16_t i = 0; i < deviceCount; i++) {
+    hardware->turnOneWireLineOn();
+    sensors->begin();
+    sensors->requestTemperatures();
 
-        if(config->getSensorStatus(i) == SensorStatusEnum::Disable)
-            continue;
-
-        config->getSensorRom(i, deviceAddress);
-        float tempTmp = sensors->getTempC((uint8_t *)deviceAddress);
-
-        if(tempTmp == DEVICE_DISCONNECTED_C) {
-            config->setSensorStatus(i, SensorStatusEnum::NoResponse);
+    for(SensorNum i = 0; i < sensorsCount; i++) {
+        //checking - if available
+        if(settings->getSensorMode(i) == SensorMode::Err) {
+            sensorsStatus[i] = SensorStatus::NoAvailable;
             continue;
         }
-
-        if(config->getSensorStatus(i) != SensorStatusEnum::Active)
-            config->setSensorStatus(i, SensorStatusEnum::Active);
+        //checking - if enabled
+        if(settings->getSensorMode(i) == SensorMode::Disable) {
+            sensorsStatus[i] = SensorStatus::Off;
+            continue;
+        }
+        //reading sensor
+        settings->getSensorRom(i, deviceAddress);
+        Temp tempTmp = sensors->getTempC((uint8_t *)deviceAddress);
+        //if no response - continue
+        if(tempTmp == DEVICE_DISCONNECTED_C) {
+            sensorsStatus[i] = SensorStatus::NoResponse;
+            continue;
+        }
+        //set status
+        sensorsStatus[i] = SensorStatus::Active;
+        //calc temp
         deviceReaded++;
         tempAvg += tempTmp;
-        config->setSensorTemp(i, tempTmp);
+        //save temperature;
+        sensorsTemp[i] = tempTmp;
     }
+    //calc temp
     tempAvg /= deviceReaded;
-    config->setTempAvg(tempAvg);
-
-
-    if(config->getDeviceModeStatus() == Auto)
-        heaterHandler(tempAvg, deviceReaded);
-
+    //save temperature averege
+    this->tempAvg = tempAvg;
+    //call handler
+    heaterHandler(tempAvg, deviceReaded);
+    //indicate temp on led
     leds->indicateAll(deviceReaded, tempAvg);
-}
-
-void CoreLogic::setI2cAddress(uint8_t addr)
-{
-    server->getNetworkObject()->setAddress(addr);
-}
-
-void CoreLogic::setDeviceMode(uint8_t status)
-{
-    if(status == Search) {
-        this->searchSensors();
-        return;
-    } else if(status == Erace) {
-        this->eraceeeprom();
-        return;
-    }
-
-    else if(status == EnableHeater)
-        hardware->turnHeaterOn();
-    else if(status == DisableHeater)
-        hardware->turnHeaterOff();
-
 }
