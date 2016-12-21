@@ -12,6 +12,25 @@
 #define ONEWIREPIN 3
 #define MULTICAST_ADDR 0x50
 
+class MemTest : public IMemory
+{
+public:
+    int8_t write(uint8_t addr, uint8_t data)
+    {
+        return OK;
+    }
+
+    int16_t read(uint8_t addr)
+    {
+        return 'h';
+    }
+
+    uint16_t size()
+    {
+        return 256;
+    }
+};
+
 int main()
 {
     auto hardware = HWiface::instance();
@@ -22,15 +41,18 @@ int main()
     Indication leds(hardware);
     BasicAutoHeaterController logic(&sensors, settings, hardware, &leds);
     UsiTwiSlave network(USI::instance(), settings, MULTICAST_ADDR);
-    MappedMemory memory(settings, &logic, &network);
+    MappedMemory<MainMem> memory(settings, &logic, &network);
+
+    //MemTest test;
+    //I2CSlaveServer server(&network, &test);
     I2CSlaveServer server(&network, &memory);
 
     hardware->init();
     network.init();
     sei();
 
-    while(1)
-        logic.doHandle();
+    while(1);
+    //logic.doHandle();
 
     return 0;
 }

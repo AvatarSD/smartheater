@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <usiTwiSlave.h>
+#include <idcells.h>
 
 // helper
 #define VER(MAJOR, MINOR) ((MAJOR << 8)|(MINOR))
@@ -10,14 +11,8 @@
 #define tempFromRaw(x) (((Temp)x)/16)
 
 // hardWare defined settings
-#define GUID_SIZE 16
 #define ROM_SIZE 8
-#define DEVNAME_SIZE 4
 #define RESERVED_SIZE 3
-
-#define DEV_NAME {'a', 'h', 't', 'r'}
-#define DEV_SW_VER VER(1, 5)
-#define DEV_HW_VER VER(0, 1)
 
 // device specific macro
 #define MAX_SENSORS 20
@@ -82,14 +77,9 @@ public:
     virtual SensorStatus getSensorStatus(SensorNum num) const;
 };
 
-class ISettingsExt
+class ISettingsExt : public ISettingsGeneral
 {
 public:
-    virtual uint8_t getDeviceGUID(uint8_t pos) const;
-    virtual uint8_t getDeviceName(uint8_t pos) const;
-    virtual uint8_t getDeviceSWver(uint8_t pos) const;
-    virtual uint8_t getDeviceHWver(uint8_t pos) const;
-
     virtual void setRequiredTempRaw(RawTemp temp);
     virtual void setSensorMode(SensorNum sensor, SensorMode mode);
     virtual RawTemp getRequiredTempRaw() const;

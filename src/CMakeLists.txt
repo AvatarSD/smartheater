@@ -18,7 +18,7 @@ project("avtoheater")
 
 SET(flags "-mmcu=attiny85 -D__AVR_ATtiny85__ -DF_CPU=1000000UL \
 	-Os -Wall -Wl,--gc-sections -fdata-sections -ffunction-sections -flto \
-	-fno-threadsafe-statics -fshort-enums -mcall-prologues -Wl,--relax")
+	-fno-threadsafe-statics -fshort-enums -mcall-prologues -Wl,--relax -fno-exceptions")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags}")
 
@@ -34,7 +34,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/net/server
 	${CMAKE_CURRENT_SOURCE_DIR}/net/polymorphmemory
 	${CMAKE_CURRENT_SOURCE_DIR}/mainlogic
-	${CMAKE_CURRENT_SOURCE_DIR}/net/slaveAddressCell)
+	${CMAKE_CURRENT_SOURCE_DIR}/net/cells)
 
 file(GLOB_RECURSE EXE_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 add_executable(${PROJECT_NAME} ${EXE_SRC})# ${ARDUINO_SRC})
