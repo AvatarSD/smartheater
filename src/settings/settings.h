@@ -22,6 +22,11 @@
 #define REQUIRED_TEMP 20
 #define DEFAULT_DEVICE_MODE DeviceMode::NormalAuto
 
+//sys
+#define DEV_NAME {'h', 'e', 't', 'r'}
+#define DEV_SW_VER VER(1, 5)
+#define DEV_HW_VER VER(0, 1)
+
 
 enum SensorStatus {
     NoAvailable = 0x00,
