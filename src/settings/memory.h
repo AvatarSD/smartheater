@@ -5,11 +5,6 @@
 #include <settings.h>
 #include <idcells.h>
 
-/*
-extern ISettingsExt * settings;
-extern IAutoHeaterControl * control;
-extern ITwiSlave * network;
-*/
 
 #define readByte(word, addr) ((uint8_t)((word >> (addr * 8)) & 0xFF));
 
@@ -28,16 +23,14 @@ public:
     RequiredTemp(ISettingsExt * settings) : settings(settings) {}
     Error write(Address addr, uint8_t data, Num num)
     {
-        static RawTemp tmp;
-        if(writeWord(tmp, addr, data) == OK)
-            settings->setRequiredTempRaw(tmp);
+        if(writeWord(tmpRead, addr, data) == OK)
+            settings->setRequiredTempRaw(tmpRead);
         return OK;
     }
     ReadType read(Address addr, Num num = 0)
     {
-        static RawTemp tmp;
-        if(addr == 0) tmp = settings->getRequiredTempRaw();
-        return readByte(tmp, addr);
+        if(addr == 0) tmpWrite = settings->getRequiredTempRaw();
+        return readByte(tmpWrite, addr);
     }
     size_t size()
     {
@@ -45,6 +38,8 @@ public:
     }
 private:
     ISettingsExt * settings;
+    RawTemp tmpRead;
+    RawTemp tmpWrite;
 };
 class SensorCount : public IMemory
 {
@@ -75,7 +70,6 @@ public:
     }
     ReadType read(Address addr, Num num = 0)
     {
-        static RawTemp tmp;
         if(addr == 0) tmp = control->getTempAvg();
         return readByte(tmp, addr);
     }
@@ -85,6 +79,7 @@ public:
     }
 private:
     IAutoHeaterControl * control;
+    RawTemp tmp;
 };
 class Status : public IMemory
 {
@@ -174,7 +169,6 @@ public:
     }
     ReadType read(Address addr, Num num = 0)
     {
-        static RawTemp tmp;
         if(addr == 0) tmp = control->getSensorTemp(num);
         return readByte(tmp, addr);
     }
@@ -184,6 +178,7 @@ public:
     }
 private:
     IAutoHeaterControl * control;
+    RawTemp tmp;
 };
 class SensStatus : public IMemory
 {
@@ -210,7 +205,7 @@ private:
     ISettingsExt * settings;
 
 };
-class _res_ : public IMemory//Composite<uint8_t[RESERVED_SIZE]>
+class _res_ : public IMemory
 {
 public:
     Error write(Address addr, uint8_t data, Num num)
@@ -219,7 +214,7 @@ public:
     }
     ReadType read(Address addr, Num num = 0)
     {
-        return 0x00;
+        return OK;
     }
     size_t size()
     {
